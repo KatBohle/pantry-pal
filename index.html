@@ -14,6 +14,8 @@
     --orange: #f3a65a;
     --line: #e7e5d9;
     --pink: #f8e7df;
+    --star: #f59e0b;
+    --star-bg: #fef3c7;
   }
   * { box-sizing: border-box; }
   body {
@@ -38,27 +40,42 @@
   .panel h2 { margin:0 0 8px; font-size:1.35rem; letter-spacing:-.03em; }
   .sub { color:var(--muted); margin:0 0 18px; line-height:1.5; font-size:.94rem; }
   .entry-row { display:flex; gap:10px; }
-  input { width:100%; min-width:0; padding:14px 15px; border:1px solid #d8ddd4; border-radius:13px; color:var(--ink); font:inherit; outline:none; }
-  input:focus { border-color:var(--green); box-shadow:0 0 0 3px #315c451a; }
+  input, select { width:100%; min-width:0; padding:14px 15px; border:1px solid #d8ddd4; border-radius:13px; color:var(--ink); font:inherit; outline:none; }
+  input:focus, select:focus { border-color:var(--green); box-shadow:0 0 0 3px #315c451a; }
   button { border:0; cursor:pointer; font:inherit; font-weight:750; border-radius:13px; padding:13px 18px; transition:transform .15s, background .15s; }
   button:active { transform:scale(.98); }
   .primary { background:var(--green); color:white; white-space:nowrap; }
   .primary:hover { background:#244a36; }
   .secondary { background:var(--green-light); color:var(--green); }
+  .surprise-btn { background: var(--orange); color: white; display: flex; align-items: center; gap: 8px; font-weight: 800; }
+  .surprise-btn:hover { background: #e09243; }
   .quick-label { font-size:.8rem; color:var(--muted); font-weight:700; margin:18px 0 9px; }
   .chips { display:flex; flex-wrap:wrap; gap:8px; }
   .chip { background:#f5f4ed; color:#45554b; padding:8px 11px; border-radius:999px; font-size:.85rem; cursor:pointer; border:1px solid transparent; }
   .chip:hover { border-color:#b8c8b8; background:var(--green-light); }
   .ingredients { display:flex; flex-wrap:wrap; gap:8px; margin-top:17px; min-height:35px; }
-  .ingredient { display:flex; align-items:center; gap:7px; background:var(--green-light); color:var(--green); padding:8px 10px 8px 12px; border-radius:999px; font-size:.88rem; font-weight:650; }
-  .ingredient button { padding:0; color:var(--green); background:transparent; font-size:1.1rem; line-height:1; }
+  .ingredient { display:flex; align-items:center; gap:7px; background:var(--green-light); color:var(--green); padding:8px 10px 8px 12px; border-radius:999px; font-size:.88rem; font-weight:650; position:relative; }
+  .ingredient.star-soon { background: var(--star-bg); border: 1px solid var(--star); color: #92400e; }
+  .star-toggle { background: transparent; border: none; padding: 0 2px; color: #9ca3af; font-size: 1.1rem; cursor: pointer; transition: color 0.2s, transform 0.2s; }
+  .star-toggle.active { color: var(--star); transform: scale(1.2); }
+  .ingredient button.remove-btn { padding:0; color:inherit; background:transparent; font-size:1.1rem; line-height:1; }
   .ingredient.beverage-tag { border-radius:14px; flex-wrap:wrap; }
   .quantity-controls { display:flex; align-items:center; gap:5px; width:100%; margin-top:4px; }
   .quantity-controls input { width:88px; padding:6px 8px; border-radius:8px; font-size:.8rem; background:white; }
   .quantity-controls select { max-width:95px; padding:6px 7px; border:1px solid #d8ddd4; border-radius:8px; color:var(--ink); font:inherit; font-size:.8rem; background:white; }
   .actions { display:flex; gap:10px; justify-content:space-between; align-items:center; margin-top:18px; flex-wrap:wrap; }
   .actions small { color:var(--muted); }
-  .results-head { display:flex; align-items:end; justify-content:space-between; gap:12px; margin:34px 0 16px; }
+
+  /* Servings & Header controls */
+  .servings-bar { display:flex; align-items:center; gap:8px; background:white; border:1px solid var(--line); padding:6px 12px; border-radius:14px; }
+  .servings-label { font-size:.85rem; color:var(--muted); font-weight:700; margin-right:2px; }
+  .servings-btn { width:28px; height:28px; border-radius:50%; padding:0; display:grid; place-items:center; background:var(--green-light); color:var(--green); font-size:1rem; font-weight:bold; }
+  .servings-btn:hover { background:#d4e4d1; }
+  .servings-count { font-weight:800; color:var(--green); min-width:18px; text-align:center; font-size:1rem; }
+
+  .results-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:34px 0 16px; flex-wrap:wrap; }
+  .results-head-left { display:flex; flex-direction:column; gap:4px; }
+  .results-head-actions { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
   .results-head h2 { margin:0; font-size:1.7rem; letter-spacing:-.04em; }
   #resultCount { color:var(--muted); font-size:.9rem; }
   .suggestion-columns { display:grid; grid-template-columns:minmax(0,1fr); grid-auto-flow:row; gap:18px; align-items:start; }
@@ -67,7 +84,9 @@
   .column-description { color:var(--muted); font-size:.88rem; line-height:1.5; margin:0 0 16px; min-height:40px; }
   .column-count { display:inline-block; margin-left:6px; background:var(--green-light); color:var(--green); border-radius:999px; padding:3px 8px; font-size:.75rem; vertical-align:middle; }
   .recipes { display:grid; grid-template-columns:1fr; gap:14px; }
-  .recipe { background:white; border:1px solid var(--line); border-radius:20px; padding:20px; }
+  .recipe { background:white; border:1px solid var(--line); border-radius:20px; padding:20px; position:relative; transition:box-shadow .2s, border-color .2s; }
+  .recipe.has-soon-badge { border: 2px solid var(--star); box-shadow: 0 4px 20px rgba(245, 158, 11, 0.15); }
+  .soon-tag { display:inline-flex; align-items:center; gap:4px; background:var(--star-bg); color:#92400e; font-size:.75rem; font-weight:800; padding:4px 10px; border-radius:999px; margin-bottom:10px; border:1px solid var(--star); }
   .recipe-top { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
   .emoji { width:48px; height:48px; border-radius:15px; display:grid; place-items:center; background:#f8eee1; font-size:27px; flex-shrink:0; }
   .recipe h3 { margin:0 0 5px; font-size:1.15rem; letter-spacing:-.025em; }
@@ -79,6 +98,40 @@
   .recipe li { margin:3px 0; }
   .missing { color:#9a6a37; }
   .insufficient { color:#c0392b; font-weight: 600; }
+  .recipe-footer { margin-top:18px; padding-top:12px; border-top:1px solid #f0eee2; display:flex; justify-content:flex-end; }
+  .cook-btn { background:var(--green); color:white; padding:10px 16px; border-radius:12px; font-size:.88rem; display:inline-flex; align-items:center; gap:6px; }
+  .cook-btn:hover { background:#244a36; }
+
+  /* Slot Machine Surprise Modal */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); display:grid; place-items:center; z-index:100; opacity:0; pointer-events:none; transition:opacity .2s; }
+  .modal-overlay.open { opacity:1; pointer-events:auto; }
+  .slot-modal { background:white; width:90%; max-width:440px; border-radius:28px; padding:28px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.3); transform:scale(.9); transition:transform .2s; }
+  .modal-overlay.open .slot-modal { transform:scale(1); }
+  .slot-window { height:120px; overflow:hidden; background:#f7f5ec; border:3px solid var(--orange); border-radius:20px; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; margin:20px 0; }
+  .slot-item { display:flex; flex-direction:column; align-items:center; justify-content:center; height:120px; font-weight:800; font-size:1.2rem; gap:6px; color:var(--ink); padding:0 12px; text-align:center; }
+  .slot-item .slot-emoji { font-size:42px; line-height:1; }
+
+  /* Full Screen Cook Mode Overlay */
+  .cook-mode-overlay { position:fixed; inset:0; background:var(--paper); z-index:200; display:flex; flex-direction:column; opacity:0; pointer-events:none; transition:opacity .25s ease; }
+  .cook-mode-overlay.open { opacity:1; pointer-events:auto; }
+  .cook-header { display:flex; align-items:center; justify-content:space-between; padding:20px 28px; border-bottom:1px solid var(--line); background:white; }
+  .cook-title { font-size:1.3rem; font-weight:800; display:flex; align-items:center; gap:10px; }
+  .cook-close { background:#f0eee2; color:var(--ink); font-size:1rem; padding:10px 18px; border-radius:12px; font-weight:750; }
+  .cook-close:hover { background:#e5e2d3; }
+  .cook-body { flex:1; overflow-y:auto; max-width:800px; margin:0 auto; width:100%; padding:32px 24px; display:flex; flex-direction:column; gap:24px; justify-content:space-between; }
+  .cook-step-card { background:white; border:2px solid var(--green); border-radius:24px; padding:32px; box-shadow:0 12px 40px rgba(0,0,0,0.06); }
+  .cook-step-num { font-size:1.1rem; font-weight:800; color:var(--green); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:12px; }
+  .cook-step-text { font-size:1.6rem; line-height:1.5; font-weight:600; color:var(--ink); }
+  .cook-nav { display:flex; gap:16px; justify-content:space-between; margin-top:auto; padding-top:20px; }
+  .cook-nav-btn { flex:1; padding:18px; font-size:1.2rem; border-radius:18px; font-weight:800; }
+
+  /* Timer Component in Cook Mode */
+  .timer-box { margin-top:24px; background:#f5f0e6; border-radius:16px; padding:16px 20px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .timer-display { font-size:2.2rem; font-family:monospace; font-weight:800; color:var(--green); letter-spacing:-0.05em; }
+  .timer-controls { display:flex; gap:8px; }
+  .timer-btn { padding:10px 16px; font-size:.9rem; border-radius:10px; background:var(--green); color:white; font-weight:700; }
+  .timer-btn.stop-btn { background:#c0392b; }
+
   .empty { border:1px dashed #d5d9cf; background:#faf9f3; border-radius:20px; padding:24px 16px; text-align:center; }
   .empty .big { font-size:38px; }
   .empty h3 { margin:8px 0; font-size:1rem; }
@@ -94,6 +147,9 @@
     .entry-row { flex-direction:column; }
     .primary { width:100%; }
     .panel { padding:18px; }
+    .results-head { flex-direction:column; align-items:flex-start; }
+    .results-head-actions { width:100%; justify-content:space-between; }
+    .cook-step-text { font-size:1.25rem; }
   }
 </style>
 </head>
@@ -108,7 +164,7 @@
     <div>
       <div class="eyebrow">Your kitchen, your possibilities</div>
       <h1>What can you <span>cook?</span></h1>
-      <p>Tell us what’s in your kitchen. We’ll find recipes you can make, show what’s missing, and give you quick instructions to get dinner going.</p>
+      <p>Tell us what’s in your kitchen. We’ll find recipes you can make, show what’s missing, and give you quick step-by-step instructions with timer support.</p>
     </div>
     <div class="hero-art" aria-label="Illustration of a bowl of food">
       <span class="spark s1">✳</span><span class="spark s2">✦</span><span class="spark s3">✳</span>
@@ -118,7 +174,7 @@
 
   <section class="panel">
     <h2>What ingredients do you have?</h2>
-    <p class="sub">Type ingredients separated by commas. Optionally enter an amount for any ingredient (g, kg, pieces, ml…) and recipes that need more than you have move down to the second box.</p>
+    <p class="sub">Type ingredients separated by commas. Tap the star ★ on any ingredient that is expiring soon to prioritize recipes and reduce food waste!</p>
     <div class="entry-row">
       <input id="ingredientInput" type="text" list="ingredientSuggestions" placeholder="e.g. rice, zucchini, milk..." aria-label="Enter ingredients" autocomplete="off">
       <datalist id="ingredientSuggestions"></datalist>
@@ -146,13 +202,25 @@
   </section>
 
   <div class="results-head">
-    <h2 id="resultsTitle">Recipe ideas</h2>
-    <div id="resultCount">Try the sample ingredients below</div>
+    <div class="results-head-left">
+      <h2 id="resultsTitle">Recipe ideas</h2>
+      <div id="resultCount">Try the sample ingredients below</div>
+    </div>
+    <div class="results-head-actions">
+      <div class="servings-bar" title="Adjust servings to scale quantities">
+        <span class="servings-label">Servings:</span>
+        <button class="servings-btn" id="decServings" aria-label="Decrease servings">-</button>
+        <span class="servings-count" id="servingsVal">2</span>
+        <button class="servings-btn" id="incServings" aria-label="Increase servings">+</button>
+      </div>
+      <button class="surprise-btn" id="surpriseBtn">🎲 Surprise me!</button>
+    </div>
   </div>
+
   <section class="suggestion-columns" aria-label="Recipe suggestions">
     <div class="suggestion-column">
       <h3 class="column-heading">🍳 You can make now <span class="column-count" id="haveCount">0</span></h3>
-      <p class="column-description">Recipes where you have every ingredient and enough of each amount you typed in. Only spices, herbs and oils are optional.</p>
+      <p class="column-description">Recipes where you have every ingredient and enough of each amount. Starred ingredients rise to the top!</p>
       <div class="recipes column-recipes" id="haveRecipes" aria-live="polite"></div>
     </div>
     <div class="suggestion-column">
@@ -167,83 +235,187 @@
     Suggestions are flexible — check ingredient quantities and make sure food is cooked safely.
   </footer>
 </div>
+
+<!-- Slot Machine Surprise Modal -->
+<div class="modal-overlay" id="slotModalOverlay" role="dialog" aria-modal="true">
+  <div class="slot-modal">
+    <h2 style="margin:0; font-size:1.4rem;">Finding a Surprise Recipe...</h2>
+    <div class="slot-window">
+      <div class="slot-item" id="slotItem">
+        <div class="slot-emoji" id="slotEmoji">🎲</div>
+        <div id="slotText">Spinning...</div>
+      </div>
+    </div>
+    <p style="color:var(--muted); font-size:.9rem; margin-bottom:20px;">Picking a dish from what you can make!</p>
+    <button class="primary" id="slotCloseBtn" style="width:100%; display:none;">View Recipe 🍽️</button>
+  </div>
+</div>
+
+<!-- Fullscreen Cook Mode -->
+<div class="cook-mode-overlay" id="cookOverlay">
+  <div class="cook-header">
+    <div class="cook-title">
+      <span id="cookEmoji" style="font-size:1.8rem">🍳</span>
+      <span id="cookRecipeName">Recipe Title</span>
+    </div>
+    <button class="cook-close" id="cookCloseBtn">Exit Cook Mode ✕</button>
+  </div>
+  <div class="cook-body">
+    <div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div class="cook-step-num" id="cookStepNum">Step 1 of 3</div>
+        <div style="font-size:0.9rem; color:var(--muted);" id="cookServingsTag">For 2 Servings</div>
+      </div>
+      <div class="cook-step-card">
+        <div class="cook-step-text" id="cookStepText">Step instructions will appear here in high-contrast big readable text...</div>
+        <div class="timer-box" id="timerContainer" style="display:none;">
+          <div>
+            <div style="font-weight:700; font-size:0.85rem; color:var(--muted); text-transform:uppercase;">Step Timer</div>
+            <div class="timer-display" id="timerDisplay">00:00</div>
+          </div>
+          <div class="timer-controls">
+            <button class="timer-btn" id="timerStartBtn">Start Timer</button>
+            <button class="timer-btn stop-btn" id="timerResetBtn">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cook-nav">
+      <button class="secondary cook-nav-btn" id="cookPrevBtn">← Previous</button>
+      <button class="primary cook-nav-btn" id="cookNextBtn">Next Step →</button>
+    </div>
+  </div>
+</div>
+
 <script>
+const BASE_SERVINGS = 2;
+let currentServings = 2;
+let useSoonSet = new Set(); // Stores starred "use soon" ingredient names
+
 const recipes = [
   {
     name:"Cheesy zucchini pasta", emoji:"🍝", time:20, difficulty:"Easy",
     ingredients:["pasta","zucchini","cheese","garlic","olive oil"],
     essentials:["pasta","zucchini"], description:"A creamy, comforting pasta with golden zucchini and melted cheese.",
-    steps:["Boil the pasta in salted water according to the packet instructions. Save a little pasta water before draining.","Slice the zucchini and fry it in a little oil for 6–8 minutes until soft and golden. Add garlic if you have it.","Stir in the drained pasta, cheese and a splash of pasta water. Mix until glossy, season, and serve."]
+    steps:[
+      "Boil the pasta in salted water according to the packet instructions (approx. 8–10 minutes). Save a little pasta water before draining.",
+      "Slice the zucchini and fry it in a little oil for 6–8 minutes until soft and golden. Add garlic if you have it.",
+      "Stir in the drained pasta, cheese and a splash of pasta water. Mix until glossy, season, and serve."
+    ]
   },
   {
     name:"Veggie fried rice", emoji:"🍚", time:15, difficulty:"Easy",
     ingredients:["rice","eggs","peas","carrots","soy sauce","spring onion"],
     essentials:["rice"], description:"A quick way to turn leftover rice and vegetables into a filling meal.",
-    steps:["Cook the rice, or use cold leftover rice. If freshly cooked, let it steam off for a few minutes.","Scramble the eggs in a hot pan with a little oil, then set them aside.","Fry any chopped vegetables until tender. Add rice and soy sauce, stir-fry for 3–4 minutes, then mix the eggs back in."]
+    steps:[
+      "Cook the rice, or use cold leftover rice. If freshly cooked, let it steam off for a few minutes.",
+      "Scramble the eggs in a hot pan with a little oil for 2 minutes, then set them aside.",
+      "Fry any chopped vegetables until tender for 4 minutes. Add rice and soy sauce, stir-fry for 3–4 minutes, then mix the eggs back in."
+    ]
   },
   {
     name:"Banana oat pancakes", emoji:"🥞", time:15, difficulty:"Easy",
     ingredients:["banana","eggs","oats","milk","cinnamon"],
     essentials:["banana","eggs"], description:"Naturally sweet pancakes made with a few everyday ingredients.",
-    steps:["Mash 1 ripe banana in a bowl and mix with 2 eggs and a few spoonfuls of oats.","Add a splash of milk (~100ml) and cinnamon if available. Let the mixture sit for 2 minutes.","Cook small pancakes in a lightly oiled pan over medium-low heat for 2–3 minutes per side, until cooked through."]
+    steps:[
+      "Mash 1 ripe banana in a bowl and mix with 2 eggs and a few spoonfuls of oats.",
+      "Add a splash of milk (~100ml) and cinnamon if available. Let the mixture sit for 2 minutes to thicken.",
+      "Cook small pancakes in a lightly oiled pan over medium-low heat for 2–3 minutes per side, until cooked through."
+    ]
   },
   {
     name:"French toast", emoji:"🍞", time:12, difficulty:"Easy",
     ingredients:["bread","eggs","milk","cinnamon","butter"],
     essentials:["bread","eggs","milk"], description:"Golden slices of bread dipped in an egg-and-milk mixture.",
-    steps:["Whisk 2 eggs with ~120ml of milk and cinnamon in a shallow bowl.","Dip each slice of bread into the mixture, coating both sides.","Fry in butter over medium heat for 2–3 minutes per side until golden and cooked through."]
+    steps:[
+      "Whisk 2 eggs with ~120ml of milk and cinnamon in a shallow bowl.",
+      "Dip each slice of bread into the mixture, coating both sides.",
+      "Fry in butter over medium heat for 2–3 minutes per side until golden and cooked through."
+    ]
   },
   {
     name:"Apple cinnamon porridge", emoji:"🥣", time:10, difficulty:"Easy",
     ingredients:["oats","milk","apple","cinnamon","honey"],
     essentials:["oats","milk"], description:"Warm porridge with apple and cinnamon.",
-    steps:["Add oats and 250ml milk to a small pot and cook over low-medium heat, stirring often.","Grate or dice the apple and stir it in with cinnamon.","Cook until creamy, adding a splash more milk if needed. Sweeten with honey if you like."]
+    steps:[
+      "Add oats and milk to a small pot and cook over low-medium heat for 5 minutes, stirring often.",
+      "Grate or dice the apple and stir it in with cinnamon.",
+      "Cook for another 2 minutes until creamy, adding a splash more milk if needed. Sweeten with honey if you like."
+    ]
   },
   {
     name:"Chocolate banana smoothie", emoji:"🥤", time:5, difficulty:"Easy",
     ingredients:["banana","milk","cocoa powder","peanut butter","honey"],
     essentials:["banana","milk"], description:"A thick smoothie that works as breakfast or a snack.",
-    steps:["Add banana, 300ml milk, cocoa powder and a spoonful of peanut butter to a blender.","Blend until smooth, adding more milk to thin it if needed.","Taste and add a little honey if you want it sweeter."]
+    steps:[
+      "Add banana, milk, cocoa powder and a spoonful of peanut butter to a blender.",
+      "Blend on high speed for 1 minute until smooth, adding more milk to thin it if needed.",
+      "Taste and add a little honey if you want it sweeter."
+    ]
   },
   {
     name:"Iced coffee", emoji:"🧋", time:5, difficulty:"Easy",
     ingredients:["coffee","milk","ice","honey"],
     essentials:["coffee","milk"], description:"A simple cold coffee you can sweeten to taste.",
-    steps:["Make coffee (~150ml) a little stronger than usual and let it cool.","Fill a glass with ice and pour in the coffee.","Add ~100ml milk and honey or sugar if you like, then stir."]
+    steps:[
+      "Make coffee (~150ml) a little stronger than usual and let it cool.",
+      "Fill a glass with ice and pour in the coffee.",
+      "Add ~100ml milk and honey or sugar if you like, then stir."
+    ]
   },
   {
     name:"Potato and cheese hash", emoji:"🥔", time:25, difficulty:"Easy",
     ingredients:["potatoes","cheese","onion","eggs","paprika"],
     essentials:["potatoes"], description:"Crispy pan-fried potatoes finished with melted cheese.",
-    steps:["Dice the potatoes into small cubes. Boil for 7–8 minutes until just starting to soften, then drain.","Fry the potatoes in oil over medium-high heat, turning occasionally, until golden and cooked through.","Add chopped onion or paprika if available. Scatter cheese over the top and cover until melted."]
+    steps:[
+      "Dice the potatoes into small cubes. Boil for 7–8 minutes until just starting to soften, then drain.",
+      "Fry the potatoes in oil over medium-high heat for 10 minutes, turning occasionally, until golden and cooked through.",
+      "Add chopped onion or paprika if available. Scatter cheese over the top and cover for 2 minutes until melted."
+    ]
   },
   {
     name:"Tomato chickpea stew", emoji:"🍅", time:25, difficulty:"Easy",
     ingredients:["chickpeas","tomatoes","onion","garlic","paprika","bread"],
     essentials:["chickpeas","tomatoes"], description:"A warm, simple stew that works with canned or fresh tomatoes.",
-    steps:["Chop the onion and garlic, then soften them in a pot with a little oil for 3–4 minutes.","Add chopped tomatoes, drained chickpeas, paprika, salt and pepper. Add a splash of water if needed.","Simmer for 15 minutes, stirring occasionally. Season and serve with bread."]
+    steps:[
+      "Chop the onion and garlic, then soften them in a pot with a little oil for 3–4 minutes.",
+      "Add chopped tomatoes, drained chickpeas, paprika, salt and pepper. Add a splash of water if needed.",
+      "Simmer for 15 minutes, stirring occasionally. Season and serve with bread."
+    ]
   },
   {
     name:"Simple veggie omelette", emoji:"🍳", time:12, difficulty:"Easy",
     ingredients:["eggs","cheese","zucchini","tomatoes","onion"],
     essentials:["eggs"], description:"A quick, flexible omelette for breakfast, lunch or a light dinner.",
-    steps:["Beat 2–3 eggs in a bowl with salt and pepper.","Cook vegetables in an oiled pan until softened.","Pour in eggs, cook on low, add cheese, fold and serve."]
+    steps:[
+      "Beat 2–3 eggs in a bowl with salt and pepper.",
+      "Cook vegetables in an oiled pan for 4 minutes until softened.",
+      "Pour in eggs, cook on low for 3 minutes, add cheese, fold and serve."
+    ]
   },
   {
     name:"Creamy tomato pasta", emoji:"🍅", time:20, difficulty:"Easy",
     ingredients:["pasta","tomatoes","cream","cheese","garlic","onion"],
     essentials:["pasta","tomatoes"], description:"A comforting tomato pasta that can be made creamy with dairy or cheese.",
-    steps:["Cook pasta in salted water. Fry chopped onion and garlic, add tomatoes and simmer.","Stir in a splash of cream or pasta water and cheese. Toss with cooked pasta."]
+    steps:[
+      "Cook pasta in salted water for 8-10 minutes.",
+      "Fry chopped onion and garlic, add tomatoes and simmer for 8 minutes.",
+      "Stir in a splash of cream or pasta water and cheese. Toss with cooked pasta."
+    ]
   },
   {
     name:"Berry yogurt bowl", emoji:"🫐", time:5, difficulty:"Easy",
     ingredients:["yogurt","frozen berries","oats","honey","banana"],
     essentials:["yogurt","frozen berries"], description:"A fast breakfast bowl with fruit and crunchy oats.",
-    steps:["Spoon yogurt into a bowl. Top with berries, sliced banana, oats and honey."]
+    steps:[
+      "Spoon yogurt into a bowl.",
+      "Top with berries, sliced banana, oats and honey."
+    ]
   }
 ];
 
-// Amounts needed per recipe, in base units: ml for liquids, pcs for countable items, g for everything else
+// Amounts needed per recipe (for BASE_SERVINGS = 2)
 const requiredAmounts = {
   "Cheesy zucchini pasta": { pasta:200, zucchini:1, cheese:80 },
   "Veggie fried rice": { rice:150, eggs:2, peas:80, carrots:1, "spring onion":2 },
@@ -294,7 +466,7 @@ const synonyms = {
   "passata":"tomatoes", "tomato sauce":"tomatoes", "tomato paste":"tomatoes",
   "minced beef":"beef", "minced meat":"vegan mince", "ground beef":"beef", "prawns":"shrimp",
   "oat milk":"milk", "almond milk":"milk", "black pepper":"pepper", "chili flakes":"chili",
-  "chilli flakes":"chili", "chilli":"chili", "spring onions":"spring onion", "shallots":"shallot"
+  "chilli flakes":"chili", "chilli":"chili", "shallots":"shallot"
 };
 
 const beverageNames = new Set(["milk","oat milk","almond milk","orange juice","apple juice","cranberry juice","grape juice","lemonade","sparkling water","water","tea","black tea","green tea","iced tea","juice","coffee","cream"]);
@@ -314,7 +486,6 @@ const normalize = value => {
   return synonyms[s] || s;
 };
 
-// Approximate weight in grams of one piece, so "3 eggs" or "300 g potatoes" can both be compared
 const pieceWeight = { eggs:60, banana:120, apple:180, potatoes:150, tomatoes:120, carrots:70, zucchini:200, onion:110, bread:35, "spring onion":15 };
 const volumeUnits = { ml:1, L:1000, cups:240, glasses:250, cartons:1000, bottles:750 };
 const weightUnits = { g:1, kg:1000 };
@@ -327,7 +498,6 @@ function baseUnit(item) {
   if (beverageNames.has(item)) return "ml";
   return pieceWeight[item] ? "pcs" : "g";
 }
-// Typed-in amount converted to the base unit of the ingredient (null = nothing entered = unlimited)
 function getAmount(item) {
   const val = parseFloat(amounts[item]);
   if (isNaN(val) || val <= 0) return null;
@@ -365,23 +535,50 @@ function addIngredients(raw) {
   if (added) findRecipes();
 }
 
+function toggleUseSoon(item, e) {
+  e.stopPropagation();
+  if (useSoonSet.has(item)) {
+    useSoonSet.delete(item);
+  } else {
+    useSoonSet.add(item);
+  }
+  renderPantry();
+  findRecipes();
+}
+
 function renderPantry() {
   list.innerHTML = "";
   pantry.forEach(item => {
+    const isSoon = useSoonSet.has(item);
     const tag = document.createElement("span");
-    tag.className = "ingredient beverage-tag";
+    tag.className = `ingredient beverage-tag ${isSoon ? "star-soon" : ""}`;
+
+    // Star Button
+    const starBtn = document.createElement("button");
+    starBtn.type = "button";
+    starBtn.className = `star-toggle ${isSoon ? "active" : ""}`;
+    starBtn.innerHTML = "★";
+    starBtn.title = isSoon ? "Marked as expiring soon" : "Mark as expiring soon";
+    starBtn.addEventListener("click", (e) => toggleUseSoon(item, e));
+
     const label = document.createElement("span");
-    label.textContent = item;
+    label.textContent = item + (isSoon ? " (Use soon!)" : "");
+
     const remove = document.createElement("button");
-    remove.type = "button"; remove.textContent = "×"; remove.setAttribute("aria-label", "Remove " + item);
+    remove.type = "button";
+    remove.className = "remove-btn";
+    remove.textContent = "×";
+    remove.setAttribute("aria-label", "Remove " + item);
     remove.addEventListener("click", () => { 
       pantry = pantry.filter(x => x !== item); 
+      useSoonSet.delete(item);
       delete amounts[item]; 
       delete units[item]; 
       renderPantry(); 
       findRecipes(); 
     });
-    tag.append(label, remove);
+
+    tag.append(starBtn, label, remove);
 
     const controls = document.createElement("span");
     controls.className = "quantity-controls";
@@ -403,10 +600,12 @@ function renderPantry() {
       units[item] = unit.value;
       findRecipes();
     });
-    controls.append(amount, unit); tag.appendChild(controls);
+    controls.append(amount, unit);
+    tag.appendChild(controls);
     list.appendChild(tag);
   });
-  hint.textContent = pantry.length ? `${pantry.length} ingredient${pantry.length === 1 ? "" : "s"} added · enter amounts to check you have enough` : "Add at least one ingredient to get started.";
+  
+  hint.textContent = pantry.length ? `${pantry.length} ingredient${pantry.length === 1 ? "" : "s"} added · tap ★ for expiring items` : "Add at least one ingredient to get started.";
 }
 
 function escapeHtml(s) {
@@ -414,24 +613,34 @@ function escapeHtml(s) {
 }
 
 function recipeCard(r, showMissing) {
-  const matchedText = r.matched.map(escapeHtml).join(", ");
+  const matchedText = r.matched.map(i => useSoonSet.has(i) ? `⭐ ${i}` : i).map(escapeHtml).join(", ");
+  const scaleRatio = currentServings / BASE_SERVINGS;
 
   const ingredientLine = r.ingredients.map(i => {
-    const req = r.required ? r.required[i] : null;
+    const baseReq = r.required ? r.required[i] : null;
+    const req = baseReq ? baseReq * scaleRatio : null;
     const avail = getAmount(i);
+
+    const isStarred = useSoonSet.has(i);
+    const starPrefix = isStarred ? "⭐ " : "";
 
     if (pantry.includes(i)) {
       if (req && avail !== null && avail < req) {
-        return `<li class="insufficient">⚠️ ${escapeHtml(i)} (you have ${fmtAmount(i, avail)}, but need ~${fmtAmount(i, req)})</li>`;
+        return `<li class="insufficient">⚠️ ${starPrefix}${escapeHtml(i)} (you have ${fmtAmount(i, avail)}, need ~${fmtAmount(i, req)})</li>`;
       }
-      return `<li>${escapeHtml(i)}${req ? ` (~${fmtAmount(i, req)})` : ""}</li>`;
+      return `<li>${starPrefix}${escapeHtml(i)}${req ? ` (~${fmtAmount(i, req)})` : ""}</li>`;
     }
     if (optionalSeasonings.has(i)) return `<li class="missing">${escapeHtml(i)} <em>(optional)</em></li>`;
     return `<li class="missing">${escapeHtml(i)}${req ? ` (~${fmtAmount(i, req)})` : ""} <em>(you could add this)</em></li>`;
   }).join("");
 
   const steps = r.steps.map(step => `<li>${escapeHtml(step)}</li>`).join("");
-  return `<article class="recipe">
+  
+  const hasSoonMatch = r.matched.some(i => useSoonSet.has(i));
+  const soonBadge = hasSoonMatch ? `<div class="soon-tag">⭐ Uses expiring ingredient</div>` : "";
+
+  return `<article class="recipe ${hasSoonMatch ? 'has-soon-badge' : ''}" id="recipe-${r.name.replace(/\s+/g, '-')}">
+    ${soonBadge}
     <div class="recipe-top">
       <div style="display:flex;gap:12px;align-items:center">
         <div class="emoji">${r.emoji}</div>
@@ -441,8 +650,11 @@ function recipeCard(r, showMissing) {
     </div>
     <p>${escapeHtml(r.description)}</p>
     ${showMissing ? `<h4>You have</h4><p style="margin:0">${matchedText}</p>` : `<h4>Using your ingredients</h4>`}
-    <h4>Ingredients</h4><ul>${ingredientLine}</ul>
+    <h4>Ingredients (${currentServings} servings)</h4><ul>${ingredientLine}</ul>
     <h4>How to make it</h4><ol>${steps}</ol>
+    <div class="recipe-footer">
+      <button class="cook-btn" onclick="startCookMode('${escapeHtml(r.name)}')">👨‍🍳 Start Cooking</button>
+    </div>
   </article>`;
 }
 
@@ -450,41 +662,54 @@ function showEmpty(container, emoji, heading, message) {
   container.innerHTML = `<div class="empty"><div class="big">${emoji}</div><h3>${heading}</h3><p>${message}</p></div>`;
 }
 
+let lastCanMake = [];
+
 function findRecipes() {
   if (!pantry.length) {
     title.textContent = "Recipe ideas";
     count.textContent = "Add ingredients to begin";
     haveCountEl.textContent = "0";
     addCountEl.textContent = "0";
+    lastCanMake = [];
     showEmpty(haveRecipesEl, "🥕", "Your next meal starts here", "Add ingredients above to find recipes you can make right now.");
     showEmpty(addRecipesEl, "🛒", "Discover more options", "Add ingredients and we’ll suggest recipes that need just one or two extras.");
     return;
   }
 
+  const scaleRatio = currentServings / BASE_SERVINGS;
+
   const scored = recipes.map(recipe => {
     const matched = recipe.ingredients.filter(i => pantry.includes(i));
     const missing = recipe.ingredients.filter(i => !pantry.includes(i));
     
-    // Quantity check: if you typed an amount and it is less than the recipe needs, the recipe is not ready
+    // Check if recipe uses any starred "use soon" ingredients
+    const soonCount = matched.filter(i => useSoonSet.has(i)).length;
+
     let lowAmount = false;
-    for (const [ing, reqAmount] of Object.entries(recipe.required || {})) {
+    for (const [ing, baseReq] of Object.entries(recipe.required || {})) {
       if (pantry.includes(ing)) {
+        const reqAmount = baseReq * scaleRatio;
         const avail = getAmount(ing);
         if (avail !== null && avail < reqAmount) lowAmount = true;
       }
     }
 
     const score = matched.length / recipe.ingredients.length;
-    return {...recipe, matched, missing, score, lowAmount};
+    return {...recipe, matched, missing, score, lowAmount, soonCount};
   }).filter(r => r.matched.length > 0)
-    .sort((a,b) => (b.score - a.score) || (b.matched.length - a.matched.length));
+    .sort((a,b) => {
+      // Prioritize "Use soon" starred ingredients
+      if (b.soonCount !== a.soonCount) return b.soonCount - a.soonCount;
+      return (b.score - a.score) || (b.matched.length - a.matched.length);
+    });
 
-  // "Can make now": every ingredient is there (spices/oils are optional) AND typed-in amounts are enough.
   const canMake = scored.filter(r => r.missing.every(i => optionalSeasonings.has(i)) && !r.lowAmount);
   const addSome = scored.filter(r => r.missing.some(i => !optionalSeasonings.has(i)) || r.lowAmount);
 
+  lastCanMake = canMake;
+
   title.textContent = "Your recipe matches";
-  count.textContent = `${canMake.length} ready now · ${addSome.length} needing extras / more amounts`;
+  count.textContent = `${canMake.length} ready now · ${addSome.length} needing extras`;
   haveCountEl.textContent = String(canMake.length);
   addCountEl.textContent = String(addSome.length);
 
@@ -500,10 +725,188 @@ function findRecipes() {
   }
 }
 
+// Servings Picker Controls
+document.getElementById("incServings").addEventListener("click", () => {
+  currentServings++;
+  document.getElementById("servingsVal").textContent = currentServings;
+  findRecipes();
+});
+document.getElementById("decServings").addEventListener("click", () => {
+  if (currentServings > 1) {
+    currentServings--;
+    document.getElementById("servingsVal").textContent = currentServings;
+    findRecipes();
+  }
+});
+
+// Surprise Me Slot Machine Logic
+const slotModal = document.getElementById("slotModalOverlay");
+const slotEmoji = document.getElementById("slotEmoji");
+const slotText = document.getElementById("slotText");
+const slotCloseBtn = document.getElementById("slotCloseBtn");
+
+document.getElementById("surpriseBtn").addEventListener("click", () => {
+  const pool = lastCanMake.length ? lastCanMake : recipes;
+  if (!pool.length) return;
+
+  slotModal.classList.add("open");
+  slotCloseBtn.style.display = "none";
+
+  let spins = 0;
+  const maxSpins = 18;
+  const targetRecipe = pool[Math.floor(Math.random() * pool.length)];
+
+  const spinInterval = setInterval(() => {
+    spins++;
+    const randomPick = pool[Math.floor(Math.random() * pool.length)];
+    slotEmoji.textContent = randomPick.emoji;
+    slotText.textContent = randomPick.name;
+
+    if (spins >= maxSpins) {
+      clearInterval(spinInterval);
+      slotEmoji.textContent = targetRecipe.emoji;
+      slotText.textContent = targetRecipe.name;
+      slotCloseBtn.style.display = "block";
+      slotCloseBtn.onclick = () => {
+        slotModal.classList.remove("open");
+        const el = document.getElementById(`recipe-${targetRecipe.name.replace(/\s+/g, '-')}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.style.borderColor = "var(--orange)";
+          setTimeout(() => el.style.borderColor = "", 2500);
+        }
+      };
+    }
+  }, 90);
+});
+
+// Cook Mode Implementation
+let currentCookRecipe = null;
+let currentStepIdx = 0;
+let timerInterval = null;
+let timerSeconds = 0;
+
+const cookOverlay = document.getElementById("cookOverlay");
+const cookEmoji = document.getElementById("cookEmoji");
+const cookRecipeName = document.getElementById("cookRecipeName");
+const cookStepNum = document.getElementById("cookStepNum");
+const cookStepText = document.getElementById("cookStepText");
+const cookServingsTag = document.getElementById("cookServingsTag");
+const cookPrevBtn = document.getElementById("cookPrevBtn");
+const cookNextBtn = document.getElementById("cookNextBtn");
+
+const timerContainer = document.getElementById("timerContainer");
+const timerDisplay = document.getElementById("timerDisplay");
+const timerStartBtn = document.getElementById("timerStartBtn");
+const timerResetBtn = document.getElementById("timerResetBtn");
+
+function startCookMode(recipeName) {
+  currentCookRecipe = recipes.find(r => r.name === recipeName);
+  if (!currentCookRecipe) return;
+
+  currentStepIdx = 0;
+  cookEmoji.textContent = currentCookRecipe.emoji;
+  cookRecipeName.textContent = currentCookRecipe.name;
+  cookServingsTag.textContent = `For ${currentServings} Servings`;
+
+  renderCookStep();
+  cookOverlay.classList.add("open");
+}
+
+function renderCookStep() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+
+  const totalSteps = currentCookRecipe.steps.length;
+  cookStepNum.textContent = `Step ${currentStepIdx + 1} of ${totalSteps}`;
+  cookStepText.textContent = currentCookRecipe.steps[currentStepIdx];
+
+  cookPrevBtn.disabled = currentStepIdx === 0;
+  cookPrevBtn.style.opacity = currentStepIdx === 0 ? "0.4" : "1";
+  cookNextBtn.textContent = currentStepIdx === totalSteps - 1 ? "Finish Cooking 🎉" : "Next Step →";
+
+  // Auto detect timer duration in minutes from step text (e.g., "6–8 minutes" -> 7 min, "15 minutes" -> 15 min)
+  const text = currentCookRecipe.steps[currentStepIdx];
+  const timeMatch = text.match(/(\d+)(?:–(\d+))?\s*min/i);
+
+  if (timeMatch) {
+    const min1 = parseInt(timeMatch[1], 10);
+    const min2 = timeMatch[2] ? parseInt(timeMatch[2], 10) : min1;
+    const avgMinutes = Math.round((min1 + min2) / 2);
+    timerSeconds = avgMinutes * 60;
+    updateTimerDisplay();
+    timerContainer.style.display = "flex";
+    timerStartBtn.textContent = "Start Timer";
+  } else {
+    timerContainer.style.display = "none";
+  }
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+  const s = (timerSeconds % 60).toString().padStart(2, '0');
+  timerDisplay.textContent = `${m}:${s}`;
+}
+
+timerStartBtn.addEventListener("click", () => {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    timerStartBtn.textContent = "Resume";
+  } else {
+    if (timerSeconds <= 0) return;
+    timerStartBtn.textContent = "Pause";
+    timerInterval = setInterval(() => {
+      timerSeconds--;
+      updateTimerDisplay();
+      if (timerSeconds <= 0) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        timerStartBtn.textContent = "Done!";
+      }
+    }, 1000);
+  }
+});
+
+timerResetBtn.addEventListener("click", () => {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  renderCookStep();
+});
+
+cookPrevBtn.addEventListener("click", () => {
+  if (currentStepIdx > 0) {
+    currentStepIdx--;
+    renderCookStep();
+  }
+});
+
+cookNextBtn.addEventListener("click", () => {
+  if (currentStepIdx < currentCookRecipe.steps.length - 1) {
+    currentStepIdx++;
+    renderCookStep();
+  } else {
+    cookOverlay.classList.remove("open");
+  }
+});
+
+document.getElementById("cookCloseBtn").addEventListener("click", () => {
+  cookOverlay.classList.remove("open");
+  clearInterval(timerInterval);
+});
+
+// Primary UI handlers
 document.getElementById("addBtn").addEventListener("click", () => addIngredients(input.value));
 input.addEventListener("keydown", e => { if (e.key === "Enter") addIngredients(input.value); });
 document.getElementById("findBtn").addEventListener("click", findRecipes);
-document.getElementById("clearBtn").addEventListener("click", () => { pantry = []; Object.keys(amounts).forEach(k => delete amounts[k]); Object.keys(units).forEach(k => delete units[k]); renderPantry(); findRecipes(); });
+document.getElementById("clearBtn").addEventListener("click", () => { 
+  pantry = []; 
+  useSoonSet.clear();
+  Object.keys(amounts).forEach(k => delete amounts[k]); 
+  Object.keys(units).forEach(k => delete units[k]); 
+  renderPantry(); 
+  findRecipes(); 
+});
 document.getElementById("quickChips").addEventListener("click", e => {
   const btn = e.target.closest("[data-ingredient]");
   if (btn) addIngredients(btn.dataset.ingredient);
