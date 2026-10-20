@@ -109,7 +109,10 @@
     <h2>What ingredients do you have?</h2>
     <p class="sub">Type an ingredient and press Enter or Add. You can add several at once, separated by commas.</p>
     <div class="entry-row">
-      <input id="ingredientInput" type="text" placeholder="e.g. rice, zucchini, eggs..." aria-label="Enter ingredients">
+      <input id="ingredientInput" type="text" list="ingredientSuggestions" placeholder="e.g. rice, zucchini, eggs..." aria-label="Enter ingredients" autocomplete="off">
+    <datalist id="ingredientSuggestions">
+      <option value="eggs"></option><option value="pasta"></option><option value="rice"></option><option value="potatoes"></option><option value="tomatoes"></option><option value="cheese"></option><option value="zucchini"></option><option value="chickpeas"></option><option value="cucumber"></option><option value="feta"></option><option value="onion"></option><option value="garlic"></option><option value="olive oil"></option><option value="bread"></option><option value="mushrooms"></option><option value="carrots"></option><option value="peas"></option><option value="soy sauce"></option><option value="yogurt"></option><option value="banana"></option><option value="oats"></option><option value="milk"></option><option value="cream"></option><option value="butter"></option><option value="tortillas"></option><option value="beans"></option><option value="lettuce"></option><option value="olives"></option><option value="lemon"></option><option value="paprika"></option><option value="spring onion"></option>
+    </datalist>
       <button class="primary" id="addBtn">+ Add ingredients</button>
     </div>
     <div class="quick-label">QUICK ADD</div>
@@ -324,7 +327,8 @@ document.getElementById("quickChips").addEventListener("click", e => {
   const btn = e.target.closest("[data-ingredient]");
   if (btn) addIngredients(btn.dataset.ingredient);
 });
-addIngredients("rice, eggs, zucchini, cheese, tomatoes");
+renderPantry();
+findRecipes();
 </script>
 </body>
 </html>
