@@ -53,7 +53,7 @@
   .ingredient { display:flex; align-items:center; gap:7px; background:var(--green-light); color:var(--green); padding:8px 10px 8px 12px; border-radius:999px; font-size:.88rem; font-weight:650; }
   .ingredient button { padding:0; color:var(--green); background:transparent; font-size:1.1rem; line-height:1; }
   .ingredient.beverage-tag { border-radius:14px; flex-wrap:wrap; }
-  .quantity-controls { display:flex; align-items:center; gap:5px; width:100%; }
+  .quantity-controls { display:flex; align-items:center; gap:5px; width:100%; margin-top:4px; }
   .quantity-controls input { width:88px; padding:6px 8px; border-radius:8px; font-size:.8rem; background:white; }
   .quantity-controls select { max-width:95px; padding:6px 7px; border:1px solid #d8ddd4; border-radius:8px; color:var(--ink); font:inherit; font-size:.8rem; background:white; }
   .actions { display:flex; gap:10px; justify-content:space-between; align-items:center; margin-top:18px; flex-wrap:wrap; }
@@ -61,7 +61,7 @@
   .results-head { display:flex; align-items:end; justify-content:space-between; gap:12px; margin:34px 0 16px; }
   .results-head h2 { margin:0; font-size:1.7rem; letter-spacing:-.04em; }
   #resultCount { color:var(--muted); font-size:.9rem; }
-  .suggestion-columns { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:18px; align-items:start; }
+  .suggestion-columns { display:grid; grid-template-columns:minmax(0,1fr); grid-auto-flow:row; gap:18px; align-items:start; }
   .suggestion-column { min-width:0; background:#f7f7f0; border:1px solid var(--line); border-radius:22px; padding:18px; }
   .column-heading { margin:0 0 6px; font-size:1.2rem; letter-spacing:-.03em; }
   .column-description { color:var(--muted); font-size:.88rem; line-height:1.5; margin:0 0 16px; min-height:40px; }
@@ -78,20 +78,17 @@
   .recipe ul, .recipe ol { padding-left:20px; margin:0; font-size:.9rem; line-height:1.6; }
   .recipe li { margin:3px 0; }
   .missing { color:#9a6a37; }
+  .insufficient { color:#c0392b; font-weight: 600; }
   .empty { border:1px dashed #d5d9cf; background:#faf9f3; border-radius:20px; padding:24px 16px; text-align:center; }
-  .empty .big { font-size:32px; }
-  .empty h3 { font-size:1rem; }
-  .empty p { font-size:.88rem; }
-  .column-recipes { min-width:0; }
   .empty .big { font-size:38px; }
-  .empty h3 { margin:8px 0; }
-  .empty p { margin:0; color:var(--muted); line-height:1.55; }
+  .empty h3 { margin:8px 0; font-size:1rem; }
+  .empty p { margin:0; color:var(--muted); line-height:1.55; font-size:.88rem; }
+  .column-recipes { min-width:0; }
   footer { margin-top:32px; text-align:center; color:var(--muted); font-size:.82rem; line-height:1.6; }
   @media (max-width:720px) {
     .hero { grid-template-columns:1fr; }
     .hero-art { min-height:170px; }
     .hero-art .plate { width:140px; height:140px; font-size:65px; }
-    .suggestion-columns { grid-template-columns:1fr; }
     .column-description { min-height:0; }
     header { align-items:flex-start; flex-direction:column; }
     .entry-row { flex-direction:column; }
@@ -121,10 +118,10 @@
 
   <section class="panel">
     <h2>What ingredients do you have?</h2>
-    <p class="sub">Type ingredients separated by commas. For drinks and other beverages, you can also enter the amount you have.</p>
+    <p class="sub">Type ingredients separated by commas. Optionally enter an amount for any ingredient (g, kg, pieces, ml…) and recipes that need more than you have move down to the second box.</p>
     <div class="entry-row">
-      <input id="ingredientInput" type="text" list="ingredientSuggestions" placeholder="e.g. rice, zucchini, eggs..." aria-label="Enter ingredients" autocomplete="off">
-    <datalist id="ingredientSuggestions"></datalist>
+      <input id="ingredientInput" type="text" list="ingredientSuggestions" placeholder="e.g. rice, zucchini, milk..." aria-label="Enter ingredients" autocomplete="off">
+      <datalist id="ingredientSuggestions"></datalist>
       <button class="primary" id="addBtn">+ Add ingredients</button>
     </div>
     <div class="quick-label">QUICK ADD</div>
@@ -132,11 +129,11 @@
       <button class="chip" data-ingredient="eggs">🥚 Eggs</button>
       <button class="chip" data-ingredient="pasta">🍝 Pasta</button>
       <button class="chip" data-ingredient="rice">🍚 Rice</button>
+      <button class="chip" data-ingredient="milk">🥛 Milk</button>
       <button class="chip" data-ingredient="potatoes">🥔 Potatoes</button>
       <button class="chip" data-ingredient="tomatoes">🍅 Tomatoes</button>
       <button class="chip" data-ingredient="cheese">🧀 Cheese</button>
       <button class="chip" data-ingredient="zucchini">🥒 Zucchini</button>
-      <button class="chip" data-ingredient="chickpeas">🫘 Chickpeas</button>
     </div>
     <div class="ingredients" id="ingredientList" aria-live="polite"></div>
     <div class="actions">
@@ -155,12 +152,12 @@
   <section class="suggestion-columns" aria-label="Recipe suggestions">
     <div class="suggestion-column">
       <h3 class="column-heading">🍳 You can make now <span class="column-count" id="haveCount">0</span></h3>
-      <p class="column-description">Recipes that use only the ingredients you entered.</p>
+      <p class="column-description">Recipes where you have every ingredient and enough of each amount you typed in. Only spices, herbs and oils are optional.</p>
       <div class="recipes column-recipes" id="haveRecipes" aria-live="polite"></div>
     </div>
     <div class="suggestion-column">
-      <h3 class="column-heading">🛒 Add an ingredient <span class="column-count" id="addCount">0</span></h3>
-      <p class="column-description">Ideas that match what you have, plus other ingredients you could add.</p>
+      <h3 class="column-heading">🛒 Add an ingredient / liquid <span class="column-count" id="addCount">0</span></h3>
+      <p class="column-description">Ideas that still need an ingredient, or more than the amount you entered.</p>
       <div class="recipes column-recipes" id="addRecipes" aria-live="polite"></div>
     </div>
   </section>
@@ -185,222 +182,95 @@ const recipes = [
     steps:["Cook the rice, or use cold leftover rice. If freshly cooked, let it steam off for a few minutes.","Scramble the eggs in a hot pan with a little oil, then set them aside.","Fry any chopped vegetables until tender. Add rice and soy sauce, stir-fry for 3–4 minutes, then mix the eggs back in."]
   },
   {
-    name:"Potato and cheese hash", emoji:"🥔", time:25, difficulty:"Easy",
-    ingredients:["potatoes","cheese","onion","eggs","paprika"],
-    essentials:["potatoes"], description:"Crispy pan-fried potatoes finished with melted cheese.",
-    steps:["Dice the potatoes into small cubes. Boil for 7–8 minutes until just starting to soften, then drain.","Fry the potatoes in oil over medium-high heat, turning occasionally, until golden and cooked through.","Add chopped onion or paprika if available. Scatter cheese over the top and cover until melted. Add a fried egg if you like."]
-  },
-  {
-    name:"Tomato chickpea stew", emoji:"🍅", time:25, difficulty:"Easy",
-    ingredients:["chickpeas","tomatoes","onion","garlic","paprika","bread"],
-    essentials:["chickpeas","tomatoes"], description:"A warm, simple stew that works with canned or fresh tomatoes.",
-    steps:["Chop the onion and garlic, then soften them in a pot with a little oil for 3–4 minutes.","Add chopped tomatoes, drained chickpeas, paprika, salt and pepper. Add a splash of water if needed.","Simmer for 15 minutes, stirring occasionally. Taste and season, then serve with bread or rice if you have it."]
-  },
-  {
-    name:"Quick Greek-style salad", emoji:"🥗", time:10, difficulty:"Easy",
-    ingredients:["cucumber","tomatoes","feta","olives","lettuce","olive oil"],
-    essentials:["cucumber","tomatoes"], description:"A fresh, crunchy salad with salty cheese and olives.",
-    steps:["Chop the cucumber and tomatoes, and tear the lettuce into bite-sized pieces.","Crumble feta over the vegetables and add olives if you have them.","Dress with olive oil, a little vinegar or lemon, black pepper and a pinch of salt."]
-  },
-  {
-    name:"Simple veggie omelette", emoji:"🍳", time:12, difficulty:"Easy",
-    ingredients:["eggs","cheese","zucchini","tomatoes","onion"],
-    essentials:["eggs"], description:"A quick, flexible omelette for breakfast, lunch or a light dinner.",
-    steps:["Beat 2–3 eggs in a bowl with salt and pepper.","If using zucchini, onion or tomatoes, chop them and cook in an oiled pan until softened.","Pour in the eggs. Cook over low-medium heat until mostly set, add cheese, fold in half and cook until the eggs are fully set."]
-  },
-  {
-    name:"Creamy tomato pasta", emoji:"🍅", time:20, difficulty:"Easy",
-    ingredients:["pasta","tomatoes","cream","cheese","garlic","onion"],
-    essentials:["pasta","tomatoes"], description:"A comforting tomato pasta that can be made creamy with dairy or cheese.",
-    steps:["Cook pasta in salted water according to the packet instructions.","Fry chopped onion and garlic in a little oil. Add chopped tomatoes and cook for 8–10 minutes until saucy.","Stir in a splash of cream or pasta water and some cheese. Toss with the drained pasta and season to taste."]
-  },
-  {
-    name:"Crispy chickpea bowl", emoji:"🫘", time:20, difficulty:"Easy",
-    ingredients:["chickpeas","rice","cucumber","yogurt","lemon","paprika"],
-    essentials:["chickpeas"], description:"A mix-and-match bowl with spiced chickpeas and a cool yogurt sauce.",
-    steps:["Drain and dry the chickpeas. Toss with oil, paprika, salt and pepper, then pan-fry for 8–10 minutes until golden.","Serve over cooked rice or any grains you have.","Mix yogurt with lemon juice, salt and a splash of water. Add chopped cucumber and spoon the sauce over the bowl."]
-  },
-  {
-    name:"Cheese quesadilla", emoji:"🫓", time:10, difficulty:"Easy",
-    ingredients:["tortillas","cheese","beans","tomatoes","onion"],
-    essentials:["tortillas","cheese"], description:"A crisp, melty snack or meal. Add beans or vegetables to make it more filling.",
-    steps:["Sprinkle cheese over half of a tortilla and add any chopped vegetables or drained beans.","Fold it over and cook in a dry pan over medium heat for 2–3 minutes per side, until golden and the cheese melts.","Let it cool briefly, slice into wedges and serve with chopped tomatoes or yogurt."]
-  },
-  {
-    name:"Garlic butter mushrooms on toast", emoji:"🍄", time:12, difficulty:"Easy",
-    ingredients:["mushrooms","bread","butter","garlic","cheese"],
-    essentials:["mushrooms","bread"], description:"Savory mushrooms piled onto crisp toast.",
-    steps:["Slice the mushrooms and chop garlic if available.","Cook mushrooms in butter or oil over medium-high heat until browned and their liquid has evaporated. Add garlic near the end.","Toast the bread, spoon the mushrooms on top, and finish with cheese, herbs or black pepper."]
-  },
-  {
-    name:"Baked feta-style vegetables", emoji:"🧀", time:30, difficulty:"Easy",
-    ingredients:["feta","zucchini","tomatoes","onion","olive oil"],
-    essentials:["feta","tomatoes"], description:"Soft roasted vegetables with salty cheese — good with bread, pasta or rice.",
-    steps:["Heat the oven to 200°C. Chop the vegetables and place them in a baking dish with olive oil, salt and pepper.","Place feta in the middle or crumble it over the vegetables.","Bake for about 20–25 minutes until the vegetables are tender. Stir together and serve with bread or cooked pasta."]
-  },
-  {
     name:"Banana oat pancakes", emoji:"🥞", time:15, difficulty:"Easy",
     ingredients:["banana","eggs","oats","milk","cinnamon"],
     essentials:["banana","eggs"], description:"Naturally sweet pancakes made with a few everyday ingredients.",
-    steps:["Mash 1 ripe banana in a bowl and mix with 2 eggs and a few spoonfuls of oats.","Add a splash of milk and cinnamon if available. Let the mixture sit for 2 minutes.","Cook small pancakes in a lightly oiled pan over medium-low heat for 2–3 minutes per side, until cooked through."]
-  }
-
-  ,{
-    name:"Creamy mushroom rice", emoji:"🍄", time:25, difficulty:"Easy",
-    ingredients:["rice","mushrooms","onion","garlic","vegetable stock","cheese"],
-    essentials:["rice","mushrooms"], description:"A cozy one-pan rice dish with mushrooms and a creamy finish.",
-    steps:["Chop the onion and mushrooms. Fry them in a little oil until softened and browned.","Stir in the rice and enough vegetable stock to cook it according to the packet instructions, adding more liquid if needed.","When the rice is tender, stir in cheese and black pepper. Serve warm."]
-  },
-  {
-    name:"Lentil curry", emoji:"🍛", time:30, difficulty:"Easy",
-    ingredients:["red lentils","coconut milk","tomatoes","onion","garlic","curry powder","rice"],
-    essentials:["red lentils","coconut milk"], description:"A simple, warming curry made with lentils and coconut milk.",
-    steps:["Cook chopped onion and garlic in a little oil for 3 minutes.","Add curry powder, red lentils, tomatoes, coconut milk and a little water.","Simmer for 18–22 minutes, stirring occasionally, until the lentils are soft. Serve with rice if available."]
-  },
-  {
-    name:"Spinach and feta pasta", emoji:"🥬", time:20, difficulty:"Easy",
-    ingredients:["pasta","spinach","feta","garlic","olive oil","lemon"],
-    essentials:["pasta","spinach"], description:"A fresh pasta with salty feta and wilted greens.",
-    steps:["Cook the pasta and save a mug of pasta water before draining.","Warm olive oil in a pan, add garlic and spinach, and cook until the spinach wilts.","Toss with pasta, crumbled feta, lemon juice and a splash of pasta water."]
-  },
-  {
-    name:"Peanut butter banana toast", emoji:"🍌", time:5, difficulty:"Easy",
-    ingredients:["bread","peanut butter","banana","honey"],
-    essentials:["bread","peanut butter"], description:"A quick sweet breakfast or snack with creamy peanut butter.",
-    steps:["Toast the bread until golden.","Spread with peanut butter and add sliced banana.","Drizzle with honey if you like and serve immediately."]
-  },
-  {
-    name:"Tuna tomato pasta", emoji:"🐟", time:20, difficulty:"Easy",
-    ingredients:["pasta","canned tuna","tomatoes","garlic","olive oil","onion"],
-    essentials:["pasta","canned tuna"], description:"A pantry-friendly pasta with tomato and tuna.",
-    steps:["Cook pasta in salted water and drain.","Fry chopped onion and garlic in olive oil. Add tomatoes and simmer for 8 minutes.","Stir in drained tuna and the pasta. Season with pepper and a little pasta water if needed."]
-  },
-  {
-    name:"Chickpea spinach curry", emoji:"🥘", time:25, difficulty:"Easy",
-    ingredients:["chickpeas","spinach","coconut milk","tomatoes","curry powder","onion"],
-    essentials:["chickpeas","spinach"], description:"A quick, creamy curry full of chickpeas and greens.",
-    steps:["Soften chopped onion in a little oil.","Add curry powder, tomatoes, drained chickpeas and coconut milk. Simmer for 12–15 minutes.","Stir in spinach until wilted. Season and serve with rice or bread."]
-  },
-  {
-    name:"Loaded baked potatoes", emoji:"🥔", time:45, difficulty:"Easy",
-    ingredients:["potatoes","cheese","sour cream","spring onion","beans"],
-    essentials:["potatoes"], description:"Fluffy potatoes with a cheesy topping and optional beans.",
-    steps:["Heat the oven to 200°C. Prick potatoes with a fork and bake for 40–50 minutes until soft.","Split each potato and fluff the inside with a fork.","Top with cheese, sour cream, spring onion or warmed beans, depending on what you have."]
-  },
-  {
-    name:"Carrot ginger soup", emoji:"🥕", time:30, difficulty:"Easy",
-    ingredients:["carrots","onion","ginger","vegetable stock","coconut milk"],
-    essentials:["carrots","vegetable stock"], description:"A smooth, gently warming soup with carrot and ginger.",
-    steps:["Slice carrots and onion. Cook in a pot with a little oil for 5 minutes.","Add grated ginger and vegetable stock. Simmer for 18–20 minutes until the carrots are soft.","Blend until smooth, then stir in a splash of coconut milk if available. Season to taste."]
-  },
-  {
-    name:"Apple cinnamon porridge", emoji:"🥣", time:10, difficulty:"Easy",
-    ingredients:["oats","milk","apple","cinnamon","honey"],
-    essentials:["oats","milk"], description:"Warm porridge with apple and cinnamon.",
-    steps:["Add oats and milk to a small pot and cook over low-medium heat, stirring often.","Grate or dice the apple and stir it in with cinnamon.","Cook until creamy, adding a splash more milk if needed. Sweeten with honey if you like."]
+    steps:["Mash 1 ripe banana in a bowl and mix with 2 eggs and a few spoonfuls of oats.","Add a splash of milk (~100ml) and cinnamon if available. Let the mixture sit for 2 minutes.","Cook small pancakes in a lightly oiled pan over medium-low heat for 2–3 minutes per side, until cooked through."]
   },
   {
     name:"French toast", emoji:"🍞", time:12, difficulty:"Easy",
     ingredients:["bread","eggs","milk","cinnamon","butter"],
     essentials:["bread","eggs","milk"], description:"Golden slices of bread dipped in an egg-and-milk mixture.",
-    steps:["Whisk eggs with a splash of milk and cinnamon in a shallow bowl.","Dip each slice of bread into the mixture, coating both sides.","Fry in butter over medium heat for 2–3 minutes per side until golden and cooked through."]
+    steps:["Whisk 2 eggs with ~120ml of milk and cinnamon in a shallow bowl.","Dip each slice of bread into the mixture, coating both sides.","Fry in butter over medium heat for 2–3 minutes per side until golden and cooked through."]
   },
   {
-    name:"Tomato and white bean soup", emoji:"🍲", time:20, difficulty:"Easy",
-    ingredients:["canned tomatoes","white beans","vegetable stock","garlic","onion","bread"],
-    essentials:["canned tomatoes","white beans"], description:"A hearty tomato soup made more filling with beans.",
-    steps:["Cook chopped onion and garlic in a little oil until soft.","Add canned tomatoes, drained white beans and vegetable stock. Simmer for 12–15 minutes.","Season with salt and pepper, then serve with bread."]
-  },
-  {
-    name:"Zucchini fritters", emoji:"🥒", time:20, difficulty:"Easy",
-    ingredients:["zucchini","eggs","flour","cheese","yogurt"],
-    essentials:["zucchini","eggs","flour"], description:"Crisp little fritters that are great with a cool yogurt dip.",
-    steps:["Grate zucchini, squeeze out as much liquid as possible, and mix with egg, flour and grated cheese.","Spoon small portions into an oiled pan and flatten gently.","Fry for 3–4 minutes per side until golden and cooked through. Serve with yogurt."]
-  },
-  {
-    name:"Egg fried noodles", emoji:"🍜", time:15, difficulty:"Easy",
-    ingredients:["noodles","eggs","carrots","soy sauce","garlic","spring onion"],
-    essentials:["noodles","eggs"], description:"Fast stir-fried noodles with egg and whatever vegetables you have.",
-    steps:["Cook noodles according to the packet and drain.","Scramble eggs in a hot oiled pan, then set aside. Stir-fry chopped carrots and garlic until tender.","Add noodles, soy sauce and the eggs. Toss well and top with spring onion if available."]
-  },
-  {
-    name:"Avocado egg toast", emoji:"🥑", time:10, difficulty:"Easy",
-    ingredients:["bread","avocado","eggs","lemon","chili flakes"],
-    essentials:["bread","avocado"], description:"Creamy avocado toast with a fried or boiled egg.",
-    steps:["Toast the bread.","Mash avocado with a little lemon juice, salt and pepper, then spread over the toast.","Top with a cooked egg and chili flakes if you like."]
-  },
-  {
-    name:"Quick coconut noodle soup", emoji:"🍜", time:20, difficulty:"Easy",
-    ingredients:["noodles","coconut milk","vegetable stock","mushrooms","spinach","soy sauce"],
-    essentials:["noodles","coconut milk","vegetable stock"], description:"A soothing noodle soup with a creamy coconut broth.",
-    steps:["Bring vegetable stock and coconut milk to a gentle simmer.","Add sliced mushrooms and cook for 5 minutes, then add noodles and cook as directed.","Stir in spinach until wilted and season with soy sauce."]
-  },
-  {
-    name:"Berry yogurt bowl", emoji:"🫐", time:5, difficulty:"Easy",
-    ingredients:["yogurt","frozen berries","oats","honey","banana"],
-    essentials:["yogurt","frozen berries"], description:"A fast breakfast bowl with fruit and crunchy oats.",
-    steps:["Spoon yogurt into a bowl.","Top with berries and sliced banana.","Finish with oats and a drizzle of honey if you like."]
-  },
-  {
-    name:"Simple tomato soup", emoji:"🍅", time:20, difficulty:"Easy",
-    ingredients:["tomatoes","onion","vegetable stock","cream","bread"],
-    essentials:["tomatoes","vegetable stock"], description:"A simple tomato soup with an optional creamy finish.",
-    steps:["Cook chopped onion in a little oil until soft.","Add tomatoes and vegetable stock. Simmer for 12–15 minutes, then blend carefully until smooth.","Stir in cream if available, season to taste and serve with bread."]
-  },
-  {
-    name:"Lemon garlic chicken", emoji:"🍗", time:30, difficulty:"Easy",
-    ingredients:["chicken breast","lemon","garlic","olive oil","potatoes","paprika"],
-    essentials:["chicken breast","lemon","garlic"], description:"Bright lemon and garlic bring lots of flavor to a simple chicken dinner.",
-    steps:["Heat the oven to 200°C. Mix olive oil, lemon juice, crushed garlic, paprika, salt and pepper.","Coat chicken with the mixture. Add chopped potatoes to the tray if using.","Bake until the chicken reaches 74°C internally and is no longer pink; timing depends on thickness. Cook potatoes until tender."]
-  },
-  {
-    name:"Black bean quesadillas", emoji:"🫓", time:15, difficulty:"Easy",
-    ingredients:["tortillas","black beans","cheese","tomatoes","cumin"],
-    essentials:["tortillas","black beans","cheese"], description:"Crispy quesadillas filled with beans and melted cheese.",
-    steps:["Drain and rinse the black beans, then mash lightly with a pinch of cumin and salt.","Spread beans and cheese over half of each tortilla; add chopped tomatoes if available and fold.","Cook in a dry pan for 2–3 minutes per side until crisp and the cheese melts."]
-  },
-  {
-    name:"Creamy pesto gnocchi", emoji:"🍝", time:15, difficulty:"Easy",
-    ingredients:["gnocchi","pesto","cream","spinach","parmesan"],
-    essentials:["gnocchi","pesto"], description:"A quick, saucy gnocchi dish with pesto and greens.",
-    steps:["Cook gnocchi according to the packet and drain.","Warm pesto with a splash of cream or cooking water in a pan.","Add gnocchi and spinach and stir until the spinach wilts. Finish with parmesan if available."]
+    name:"Apple cinnamon porridge", emoji:"🥣", time:10, difficulty:"Easy",
+    ingredients:["oats","milk","apple","cinnamon","honey"],
+    essentials:["oats","milk"], description:"Warm porridge with apple and cinnamon.",
+    steps:["Add oats and 250ml milk to a small pot and cook over low-medium heat, stirring often.","Grate or dice the apple and stir it in with cinnamon.","Cook until creamy, adding a splash more milk if needed. Sweeten with honey if you like."]
   },
   {
     name:"Chocolate banana smoothie", emoji:"🥤", time:5, difficulty:"Easy",
     ingredients:["banana","milk","cocoa powder","peanut butter","honey"],
     essentials:["banana","milk"], description:"A thick smoothie that works as breakfast or a snack.",
-    steps:["Add banana, milk, cocoa powder and a spoonful of peanut butter to a blender.","Blend until smooth, adding more milk to thin it if needed.","Taste and add a little honey if you want it sweeter."]
+    steps:["Add banana, 300ml milk, cocoa powder and a spoonful of peanut butter to a blender.","Blend until smooth, adding more milk to thin it if needed.","Taste and add a little honey if you want it sweeter."]
   },
   {
     name:"Iced coffee", emoji:"🧋", time:5, difficulty:"Easy",
     ingredients:["coffee","milk","ice","honey"],
     essentials:["coffee","milk"], description:"A simple cold coffee you can sweeten to taste.",
-    steps:["Make coffee a little stronger than usual and let it cool.","Fill a glass with ice and pour in the coffee.","Add milk and honey or sugar if you like, then stir."]
+    steps:["Make coffee (~150ml) a little stronger than usual and let it cool.","Fill a glass with ice and pour in the coffee.","Add ~100ml milk and honey or sugar if you like, then stir."]
+  },
+  {
+    name:"Potato and cheese hash", emoji:"🥔", time:25, difficulty:"Easy",
+    ingredients:["potatoes","cheese","onion","eggs","paprika"],
+    essentials:["potatoes"], description:"Crispy pan-fried potatoes finished with melted cheese.",
+    steps:["Dice the potatoes into small cubes. Boil for 7–8 minutes until just starting to soften, then drain.","Fry the potatoes in oil over medium-high heat, turning occasionally, until golden and cooked through.","Add chopped onion or paprika if available. Scatter cheese over the top and cover until melted."]
+  },
+  {
+    name:"Tomato chickpea stew", emoji:"🍅", time:25, difficulty:"Easy",
+    ingredients:["chickpeas","tomatoes","onion","garlic","paprika","bread"],
+    essentials:["chickpeas","tomatoes"], description:"A warm, simple stew that works with canned or fresh tomatoes.",
+    steps:["Chop the onion and garlic, then soften them in a pot with a little oil for 3–4 minutes.","Add chopped tomatoes, drained chickpeas, paprika, salt and pepper. Add a splash of water if needed.","Simmer for 15 minutes, stirring occasionally. Season and serve with bread."]
+  },
+  {
+    name:"Simple veggie omelette", emoji:"🍳", time:12, difficulty:"Easy",
+    ingredients:["eggs","cheese","zucchini","tomatoes","onion"],
+    essentials:["eggs"], description:"A quick, flexible omelette for breakfast, lunch or a light dinner.",
+    steps:["Beat 2–3 eggs in a bowl with salt and pepper.","Cook vegetables in an oiled pan until softened.","Pour in eggs, cook on low, add cheese, fold and serve."]
+  },
+  {
+    name:"Creamy tomato pasta", emoji:"🍅", time:20, difficulty:"Easy",
+    ingredients:["pasta","tomatoes","cream","cheese","garlic","onion"],
+    essentials:["pasta","tomatoes"], description:"A comforting tomato pasta that can be made creamy with dairy or cheese.",
+    steps:["Cook pasta in salted water. Fry chopped onion and garlic, add tomatoes and simmer.","Stir in a splash of cream or pasta water and cheese. Toss with cooked pasta."]
+  },
+  {
+    name:"Berry yogurt bowl", emoji:"🫐", time:5, difficulty:"Easy",
+    ingredients:["yogurt","frozen berries","oats","honey","banana"],
+    essentials:["yogurt","frozen berries"], description:"A fast breakfast bowl with fruit and crunchy oats.",
+    steps:["Spoon yogurt into a bowl. Top with berries, sliced banana, oats and honey."]
   }
-
 ];
 
-// A larger autocomplete list of common cooking ingredients. This is a practical
-// cooking-focused list rather than the full USDA nutrition database, which also
-// contains branded products and technical food descriptions.
+// Amounts needed per recipe, in base units: ml for liquids, pcs for countable items, g for everything else
+const requiredAmounts = {
+  "Cheesy zucchini pasta": { pasta:200, zucchini:1, cheese:80 },
+  "Veggie fried rice": { rice:150, eggs:2, peas:80, carrots:1, "spring onion":2 },
+  "Banana oat pancakes": { banana:1, eggs:2, oats:60, milk:100 },
+  "French toast": { bread:4, eggs:2, milk:120, butter:20 },
+  "Apple cinnamon porridge": { oats:60, milk:250, apple:1 },
+  "Chocolate banana smoothie": { banana:1, milk:300, "cocoa powder":15, "peanut butter":15 },
+  "Iced coffee": { coffee:150, milk:100 },
+  "Potato and cheese hash": { potatoes:3, cheese:60, onion:1, eggs:2 },
+  "Tomato chickpea stew": { chickpeas:240, tomatoes:4, onion:1 },
+  "Simple veggie omelette": { eggs:3, cheese:40, zucchini:0.5, tomatoes:1, onion:1 },
+  "Creamy tomato pasta": { pasta:200, tomatoes:4, cream:100, cheese:50, onion:1 },
+  "Berry yogurt bowl": { yogurt:200, "frozen berries":100, oats:40, banana:1 }
+};
+recipes.forEach(r => { r.required = requiredAmounts[r.name] || {}; });
+
 const ingredientNames = [
-  // Vegetables and herbs
   "artichoke","arugula","asparagus","aubergine","avocado","beetroot","bell pepper","bok choy","broccoli","brussels sprouts","cabbage","capers","carrot","carrots","cauliflower","celery","chard","cherry tomatoes","chili","chili flakes","corn","sweetcorn","eggplant","fennel","garlic","ginger","green beans","green peas","kale","leek","lettuce","mushrooms","okra","onion","red onion","spring onion","shallot","spinach","sweet potato","tomato","tomatoes","turnip","zucchini","courgette","cucumber","pumpkin","butternut squash","radish","rocket","parsley","basil","coriander","cilantro","dill","mint","rosemary","sage","thyme","chives",
-  // Fruit
-  "apple","apples","apricot","banana","blackberries","blueberries","cherries","coconut","cranberries","dates","figs","grapes","grapefruit","kiwi","lemon","lime","mango","melon","nectarine","orange","peach","pear","pineapple","plum","pomegranate","raspberries","strawberries","watermelon","avocado",
-  // Beans, pulses, nuts and seeds
+  "apple","apples","apricot","banana","blackberries","blueberries","cherries","coconut","cranberries","dates","figs","grapes","grapefruit","kiwi","lemon","lime","mango","melon","nectarine","orange","peach","pear","pineapple","plum","pomegranate","raspberries","strawberries","watermelon",
   "black beans","butter beans","cannellini beans","chickpeas","edamame","kidney beans","lentils","red lentils","green lentils","split peas","tofu","tempeh","peanuts","almonds","cashews","hazelnuts","walnuts","peanut butter","tahini","chia seeds","flax seeds","sesame seeds","pumpkin seeds","sunflower seeds",
-  // Grains, bread and pasta
   "barley","breadcrumbs","bread","baguette","bagels","bulgur","couscous","crackers","flour","gnocchi","lasagne sheets","oats","oatmeal","pasta","penne","spaghetti","noodles","rice","brown rice","basmati rice","quinoa","couscous","tortillas","wraps","pita bread","pita","panko","polenta","rice noodles","sourdough","toast","wholemeal bread","cereal",
-  // Dairy and eggs
   "eggs","egg","milk","oat milk","almond milk","cream","sour cream","yogurt","yoghurt","greek yogurt","butter","cheese","cheddar","mozzarella","parmesan","feta","ricotta","cream cheese","cottage cheese","goat cheese","halloumi","blue cheese","gruyere","gouda","buttermilk",
-  // Meat, fish and alternatives
   "chicken","chicken breast","chicken thighs","turkey","beef","minced beef","minced meat","pork","bacon","ham","sausage","salami","chorizo","lamb","tuna","canned tuna","salmon","smoked salmon","white fish","cod","prawns","shrimp","anchovies","sardines","fish fingers","vegan mince","plant-based mince","seitan",
-  // Pantry, sauces and seasoning
   "olive oil","vegetable oil","sunflower oil","sesame oil","coconut oil","vinegar","balsamic vinegar","apple cider vinegar","soy sauce","tamari","fish sauce","worcestershire sauce","hot sauce","sriracha","ketchup","mayonnaise","mustard","pesto","tomato paste","passata","canned tomatoes","chopped tomatoes","tomato sauce","coconut milk","stock","vegetable stock","chicken stock","bouillon","honey","maple syrup","sugar","brown sugar","icing sugar","salt","black pepper","paprika","smoked paprika","cumin","curry powder","curry paste","turmeric","cinnamon","nutmeg","oregano","chili powder","chili flakes","vanilla extract","baking powder","baking soda","yeast","cornstarch","cornflour","jam","pickles","olives","sun-dried tomatoes","capers","raisins","dark chocolate","cocoa powder","coffee",
-  // Other common ingredients
   "potato","potatoes","sweetcorn","frozen vegetables","frozen peas","frozen spinach","frozen berries","broth","water","orange juice","apple juice","cranberry juice","grape juice","lemonade","sparkling water","tea","black tea","green tea","iced tea","juice","garlic powder","onion powder","dried oregano","dried basil","italian seasoning","herbs","mixed herbs"
 ];
+
 const suggestionList = document.getElementById("ingredientSuggestions");
 [...new Set(ingredientNames)].sort((a,b) => a.localeCompare(b)).forEach(name => {
   const option = document.createElement("option");
@@ -426,13 +296,53 @@ const synonyms = {
   "oat milk":"milk", "almond milk":"milk", "black pepper":"pepper", "chili flakes":"chili",
   "chilli flakes":"chili", "chilli":"chili", "spring onions":"spring onion", "shallots":"shallot"
 };
-const beverageNames = new Set(["milk","oat milk","almond milk","orange juice","apple juice","cranberry juice","grape juice","lemonade","sparkling water","water","tea","black tea","green tea","iced tea","juice","coffee"]);
-const beverageAmounts = {};
-const beverageUnits = {};
+
+const beverageNames = new Set(["milk","oat milk","almond milk","orange juice","apple juice","cranberry juice","grape juice","lemonade","sparkling water","water","tea","black tea","green tea","iced tea","juice","coffee","cream"]);
+const amounts = {};
+const units = {};
+
+const optionalSeasonings = new Set([
+  "salt", "black pepper", "pepper", "paprika", "smoked paprika", "cumin", "curry powder",
+  "curry paste", "turmeric", "cinnamon", "nutmeg", "oregano", "chili powder", "chili flakes",
+  "chili", "vanilla extract", "italian seasoning", "herbs", "mixed herbs", "dried oregano",
+  "dried basil", "garlic powder", "onion powder", "olive oil", "vegetable oil", "sunflower oil",
+  "sesame oil", "vinegar", "balsamic vinegar"
+]);
+
 const normalize = value => {
   const s = value.trim().toLowerCase().replace(/[.!]/g,"");
   return synonyms[s] || s;
 };
+
+// Approximate weight in grams of one piece, so "3 eggs" or "300 g potatoes" can both be compared
+const pieceWeight = { eggs:60, banana:120, apple:180, potatoes:150, tomatoes:120, carrots:70, zucchini:200, onion:110, bread:35, "spring onion":15 };
+const volumeUnits = { ml:1, L:1000, cups:240, glasses:250, cartons:1000, bottles:750 };
+const weightUnits = { g:1, kg:1000 };
+
+function unitsFor(item) {
+  if (beverageNames.has(item)) return Object.keys(volumeUnits);
+  return pieceWeight[item] ? ["pcs","g","kg"] : ["g","kg"];
+}
+function baseUnit(item) {
+  if (beverageNames.has(item)) return "ml";
+  return pieceWeight[item] ? "pcs" : "g";
+}
+// Typed-in amount converted to the base unit of the ingredient (null = nothing entered = unlimited)
+function getAmount(item) {
+  const val = parseFloat(amounts[item]);
+  if (isNaN(val) || val <= 0) return null;
+  const unit = units[item] || baseUnit(item);
+  if (beverageNames.has(item)) return val * (volumeUnits[unit] || 1);
+  if (unit === "pcs") return val;
+  const grams = val * (weightUnits[unit] || 1);
+  return pieceWeight[item] ? grams / pieceWeight[item] : grams;
+}
+function fmtAmount(item, v) {
+  const r = Math.round(v * 10) / 10;
+  const b = baseUnit(item);
+  return b === "pcs" ? `${r} pcs` : `${r}${b}`;
+}
+
 let pantry = [];
 const input = document.getElementById("ingredientInput");
 const list = document.getElementById("ingredientList");
@@ -454,45 +364,72 @@ function addIngredients(raw) {
   renderPantry();
   if (added) findRecipes();
 }
+
 function renderPantry() {
   list.innerHTML = "";
   pantry.forEach(item => {
     const tag = document.createElement("span");
-    tag.className = "ingredient" + (beverageNames.has(item) ? " beverage-tag" : "");
+    tag.className = "ingredient beverage-tag";
     const label = document.createElement("span");
     label.textContent = item;
     const remove = document.createElement("button");
     remove.type = "button"; remove.textContent = "×"; remove.setAttribute("aria-label", "Remove " + item);
-    remove.addEventListener("click", () => { pantry = pantry.filter(x => x !== item); delete beverageAmounts[item]; delete beverageUnits[item]; renderPantry(); findRecipes(); });
+    remove.addEventListener("click", () => { 
+      pantry = pantry.filter(x => x !== item); 
+      delete amounts[item]; 
+      delete units[item]; 
+      renderPantry(); 
+      findRecipes(); 
+    });
     tag.append(label, remove);
-    if (beverageNames.has(item)) {
-      const controls = document.createElement("span");
-      controls.className = "quantity-controls";
-      const amount = document.createElement("input");
-      amount.type = "number"; amount.min = "0"; amount.step = "any"; amount.placeholder = "Amount";
-      amount.setAttribute("aria-label", `Amount of ${item}`);
-      amount.value = beverageAmounts[item] || "";
-      amount.addEventListener("input", () => { beverageAmounts[item] = amount.value; });
-      const unit = document.createElement("select");
-      unit.setAttribute("aria-label", `Unit for ${item}`);
-      ["ml","L","cups","glasses","cartons","bottles"].forEach(u => { const opt = document.createElement("option"); opt.value = u; opt.textContent = u; unit.appendChild(opt); });
-      unit.value = beverageUnits[item] || "ml";
-      unit.addEventListener("change", () => { beverageUnits[item] = unit.value; });
-      controls.append(amount, unit); tag.appendChild(controls);
-    }
+
+    const controls = document.createElement("span");
+    controls.className = "quantity-controls";
+    const amount = document.createElement("input");
+    amount.type = "number"; amount.min = "0"; amount.step = "any"; amount.placeholder = "Amount";
+    amount.setAttribute("aria-label", `Amount of ${item}`);
+    amount.value = amounts[item] || "";
+    amount.addEventListener("input", () => {
+      amounts[item] = amount.value;
+      findRecipes();
+    });
+    const unit = document.createElement("select");
+    unit.setAttribute("aria-label", `Unit for ${item}`);
+    unitsFor(item).forEach(u => {
+      const opt = document.createElement("option"); opt.value = u; opt.textContent = u; unit.appendChild(opt);
+    });
+    unit.value = units[item] || baseUnit(item);
+    unit.addEventListener("change", () => {
+      units[item] = unit.value;
+      findRecipes();
+    });
+    controls.append(amount, unit); tag.appendChild(controls);
     list.appendChild(tag);
   });
-  hint.textContent = pantry.length ? `${pantry.length} ingredient${pantry.length === 1 ? "" : "s"} added · enter amounts for beverages if you want` : "Add at least one ingredient to get started.";
+  hint.textContent = pantry.length ? `${pantry.length} ingredient${pantry.length === 1 ? "" : "s"} added · enter amounts to check you have enough` : "Add at least one ingredient to get started.";
 }
+
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+
 function recipeCard(r, showMissing) {
   const matchedText = r.matched.map(escapeHtml).join(", ");
+
   const ingredientLine = r.ingredients.map(i => {
-    if (pantry.includes(i)) return `<li>${escapeHtml(i)}</li>`;
-    return `<li class="missing">${escapeHtml(i)} <em>(you could add this)</em></li>`;
+    const req = r.required ? r.required[i] : null;
+    const avail = getAmount(i);
+
+    if (pantry.includes(i)) {
+      if (req && avail !== null && avail < req) {
+        return `<li class="insufficient">⚠️ ${escapeHtml(i)} (you have ${fmtAmount(i, avail)}, but need ~${fmtAmount(i, req)})</li>`;
+      }
+      return `<li>${escapeHtml(i)}${req ? ` (~${fmtAmount(i, req)})` : ""}</li>`;
+    }
+    if (optionalSeasonings.has(i)) return `<li class="missing">${escapeHtml(i)} <em>(optional)</em></li>`;
+    return `<li class="missing">${escapeHtml(i)}${req ? ` (~${fmtAmount(i, req)})` : ""} <em>(you could add this)</em></li>`;
   }).join("");
+
   const steps = r.steps.map(step => `<li>${escapeHtml(step)}</li>`).join("");
   return `<article class="recipe">
     <div class="recipe-top">
@@ -508,9 +445,11 @@ function recipeCard(r, showMissing) {
     <h4>How to make it</h4><ol>${steps}</ol>
   </article>`;
 }
+
 function showEmpty(container, emoji, heading, message) {
   container.innerHTML = `<div class="empty"><div class="big">${emoji}</div><h3>${heading}</h3><p>${message}</p></div>`;
 }
+
 function findRecipes() {
   if (!pantry.length) {
     title.textContent = "Recipe ideas";
@@ -521,45 +460,55 @@ function findRecipes() {
     showEmpty(addRecipesEl, "🛒", "Discover more options", "Add ingredients and we’ll suggest recipes that need just one or two extras.");
     return;
   }
+
   const scored = recipes.map(recipe => {
     const matched = recipe.ingredients.filter(i => pantry.includes(i));
     const missing = recipe.ingredients.filter(i => !pantry.includes(i));
+    
+    // Quantity check: if you typed an amount and it is less than the recipe needs, the recipe is not ready
+    let lowAmount = false;
+    for (const [ing, reqAmount] of Object.entries(recipe.required || {})) {
+      if (pantry.includes(ing)) {
+        const avail = getAmount(ing);
+        if (avail !== null && avail < reqAmount) lowAmount = true;
+      }
+    }
+
     const score = matched.length / recipe.ingredients.length;
-    return {...recipe, matched, missing, score};
+    return {...recipe, matched, missing, score, lowAmount};
   }).filter(r => r.matched.length > 0)
     .sort((a,b) => (b.score - a.score) || (b.matched.length - a.matched.length));
 
-  // The first column requires every listed recipe ingredient to be in the pantry.
-  const canMake = scored.filter(r => r.missing.length === 0);
-  const addSome = scored.filter(r => r.missing.length > 0);
+  // "Can make now": every ingredient is there (spices/oils are optional) AND typed-in amounts are enough.
+  const canMake = scored.filter(r => r.missing.every(i => optionalSeasonings.has(i)) && !r.lowAmount);
+  const addSome = scored.filter(r => r.missing.some(i => !optionalSeasonings.has(i)) || r.lowAmount);
+
   title.textContent = "Your recipe matches";
-  count.textContent = `${canMake.length} ready now · ${addSome.length} with extras`;
+  count.textContent = `${canMake.length} ready now · ${addSome.length} needing extras / more amounts`;
   haveCountEl.textContent = String(canMake.length);
   addCountEl.textContent = String(addSome.length);
 
   if (canMake.length) {
     haveRecipesEl.innerHTML = canMake.slice(0,8).map(r => recipeCard(r, false)).join("");
   } else {
-    showEmpty(haveRecipesEl, "🥣", "Nothing ready just yet", "No recipe currently matches every listed ingredient. Try adding more ingredients, or check the ideas in the next column.");
+    showEmpty(haveRecipesEl, "🥣", "Nothing ready right now", "No recipe currently matches all ingredients and amounts. Check the suggestions below.");
   }
   if (addSome.length) {
     addRecipesEl.innerHTML = addSome.slice(0,8).map(r => recipeCard(r, true)).join("");
   } else {
     showEmpty(addRecipesEl, "✨", "You have everything", "All matching recipes can already be made with the ingredients you entered.");
   }
-  if (!scored.length) {
-    showEmpty(haveRecipesEl, "🥕", "No matches yet", "Try adding a staple such as eggs, pasta, rice, potatoes, tomatoes, cheese or chickpeas.");
-    showEmpty(addRecipesEl, "🧑‍🍳", "Try another ingredient", "We’ll show recipes that use at least one ingredient you have and suggest what else to add.");
-  }
 }
+
 document.getElementById("addBtn").addEventListener("click", () => addIngredients(input.value));
 input.addEventListener("keydown", e => { if (e.key === "Enter") addIngredients(input.value); });
 document.getElementById("findBtn").addEventListener("click", findRecipes);
-document.getElementById("clearBtn").addEventListener("click", () => { pantry = []; renderPantry(); findRecipes(); });
+document.getElementById("clearBtn").addEventListener("click", () => { pantry = []; Object.keys(amounts).forEach(k => delete amounts[k]); Object.keys(units).forEach(k => delete units[k]); renderPantry(); findRecipes(); });
 document.getElementById("quickChips").addEventListener("click", e => {
   const btn = e.target.closest("[data-ingredient]");
   if (btn) addIngredients(btn.dataset.ingredient);
 });
+
 renderPantry();
 findRecipes();
 </script>
