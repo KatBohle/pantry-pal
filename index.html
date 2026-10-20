@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pantry Pal — What can I cook?</title>
+<style>
+  :root {
+    --ink: #24352d;
+    --muted: #68776e;
+    --paper: #fffdf7;
+    --green: #315c45;
+    --green-light: #e7f0e5;
+    --orange: #f3a65a;
+    --line: #e7e5d9;
+    --pink: #f8e7df;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; color: var(--ink); background: var(--paper);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  .page { max-width: 1050px; margin: 0 auto; padding: 28px 20px 60px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 34px; }
+  .brand { display:flex; align-items:center; gap:10px; font-weight:800; font-size:1.1rem; letter-spacing:-.03em; }
+  .brand-icon { display:grid; place-items:center; width:40px; height:40px; border-radius:14px; background:var(--green); color:white; font-size:22px; }
+  .top-note { color:var(--muted); font-size:.9rem; }
+  .hero { display:grid; grid-template-columns: 1.2fr .8fr; align-items:center; gap:26px; margin-bottom:28px; }
+  .eyebrow { color:var(--green); font-weight:800; text-transform:uppercase; letter-spacing:.12em; font-size:.75rem; }
+  h1 { font-size:clamp(2.4rem, 5vw, 4.4rem); line-height:1.02; letter-spacing:-.065em; margin:12px 0 16px; max-width:650px; }
+  h1 span { color:var(--green); }
+  .hero p { color:var(--muted); font-size:1.05rem; line-height:1.65; max-width:540px; margin:0; }
+  .hero-art { min-height:210px; display:grid; place-items:center; background:#f5eddd; border-radius:28px; position:relative; overflow:hidden; }
+  .hero-art .plate { width:180px; height:180px; border-radius:50%; background:#fffdf7; box-shadow:0 10px 0 #e8dcc7; display:grid; place-items:center; font-size:86px; transform:rotate(-8deg); }
+  .spark { position:absolute; font-size:28px; }
+  .s1 { top:22px; left:24px; } .s2 { right:28px; top:40px; } .s3 { right:48px; bottom:22px; }
+  .panel { background:white; border:1px solid var(--line); border-radius:24px; padding:24px; box-shadow:0 8px 30px rgba(36,53,45,.04); }
+  .panel h2 { margin:0 0 8px; font-size:1.35rem; letter-spacing:-.03em; }
+  .sub { color:var(--muted); margin:0 0 18px; line-height:1.5; font-size:.94rem; }
+  .entry-row { display:flex; gap:10px; }
+  input { width:100%; min-width:0; padding:14px 15px; border:1px solid #d8ddd4; border-radius:13px; color:var(--ink); font:inherit; outline:none; }
+  input:focus { border-color:var(--green); box-shadow:0 0 0 3px #315c451a; }
+  button { border:0; cursor:pointer; font:inherit; font-weight:750; border-radius:13px; padding:13px 18px; transition:transform .15s, background .15s; }
+  button:active { transform:scale(.98); }
+  .primary { background:var(--green); color:white; white-space:nowrap; }
+  .primary:hover { background:#244a36; }
+  .secondary { background:var(--green-light); color:var(--green); }
+  .quick-label { font-size:.8rem; color:var(--muted); font-weight:700; margin:18px 0 9px; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; }
+  .chip { background:#f5f4ed; color:#45554b; padding:8px 11px; border-radius:999px; font-size:.85rem; cursor:pointer; border:1px solid transparent; }
+  .chip:hover { border-color:#b8c8b8; background:var(--green-light); }
+  .ingredients { display:flex; flex-wrap:wrap; gap:8px; margin-top:17px; min-height:35px; }
+  .ingredient { display:flex; align-items:center; gap:7px; background:var(--green-light); color:var(--green); padding:8px 10px 8px 12px; border-radius:999px; font-size:.88rem; font-weight:650; }
+  .ingredient button { padding:0; color:var(--green); background:transparent; font-size:1.1rem; line-height:1; }
+  .actions { display:flex; gap:10px; justify-content:space-between; align-items:center; margin-top:18px; flex-wrap:wrap; }
+  .actions small { color:var(--muted); }
+  .results-head { display:flex; align-items:end; justify-content:space-between; gap:12px; margin:34px 0 16px; }
+  .results-head h2 { margin:0; font-size:1.7rem; letter-spacing:-.04em; }
+  #resultCount { color:var(--muted); font-size:.9rem; }
+  .recipes { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:15px; }
+  .recipe { background:white; border:1px solid var(--line); border-radius:20px; padding:20px; }
+  .recipe-top { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+  .emoji { width:48px; height:48px; border-radius:15px; display:grid; place-items:center; background:#f8eee1; font-size:27px; flex-shrink:0; }
+  .recipe h3 { margin:0 0 5px; font-size:1.15rem; letter-spacing:-.025em; }
+  .meta { color:var(--muted); font-size:.82rem; }
+  .match { background:var(--green-light); color:var(--green); border-radius:999px; padding:6px 9px; font-size:.75rem; font-weight:800; white-space:nowrap; }
+  .recipe p { color:var(--muted); line-height:1.5; font-size:.91rem; }
+  .recipe h4 { font-size:.8rem; text-transform:uppercase; letter-spacing:.08em; margin:16px 0 7px; }
+  .recipe ul, .recipe ol { padding-left:20px; margin:0; font-size:.9rem; line-height:1.6; }
+  .recipe li { margin:3px 0; }
+  .missing { color:#9a6a37; }
+  .empty { border:1px dashed #d5d9cf; background:#faf9f3; border-radius:20px; padding:30px 20px; text-align:center; grid-column:1/-1; }
+  .empty .big { font-size:38px; }
+  .empty h3 { margin:8px 0; }
+  .empty p { margin:0; color:var(--muted); line-height:1.55; }
+  footer { margin-top:32px; text-align:center; color:var(--muted); font-size:.82rem; line-height:1.6; }
+  @media (max-width:720px) {
+    .hero { grid-template-columns:1fr; }
+    .hero-art { min-height:170px; }
+    .hero-art .plate { width:140px; height:140px; font-size:65px; }
+    .recipes { grid-template-columns:1fr; }
+    header { align-items:flex-start; flex-direction:column; }
+    .entry-row { flex-direction:column; }
+    .primary { width:100%; }
+    .panel { padding:18px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="brand"><div class="brand-icon">♨</div> Pantry Pal</div>
+    <div class="top-note">Less waste. More delicious.</div>
+  </header>
+
+  <section class="hero">
+    <div>
+      <div class="eyebrow">Your kitchen, your possibilities</div>
+      <h1>What can you <span>cook?</span></h1>
+      <p>Tell us what’s in your kitchen. We’ll find recipes you can make, show what’s missing, and give you quick instructions to get dinner going.</p>
+    </div>
+    <div class="hero-art" aria-label="Illustration of a bowl of food">
+      <span class="spark s1">✳</span><span class="spark s2">✦</span><span class="spark s3">✳</span>
+      <div class="plate">🥗</div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>What ingredients do you have?</h2>
+    <p class="sub">Type an ingredient and press Enter or Add. You can add several at once, separated by commas.</p>
+    <div class="entry-row">
+      <input id="ingredientInput" type="text" placeholder="e.g. rice, zucchini, eggs..." aria-label="Enter ingredients">
+      <button class="primary" id="addBtn">+ Add ingredients</button>
+    </div>
+    <div class="quick-label">QUICK ADD</div>
+    <div class="chips" id="quickChips">
+      <button class="chip" data-ingredient="eggs">🥚 Eggs</button>
+      <button class="chip" data-ingredient="pasta">🍝 Pasta</button>
+      <button class="chip" data-ingredient="rice">🍚 Rice</button>
+      <button class="chip" data-ingredient="potatoes">🥔 Potatoes</button>
+      <button class="chip" data-ingredient="tomatoes">🍅 Tomatoes</button>
+      <button class="chip" data-ingredient="cheese">🧀 Cheese</button>
+      <button class="chip" data-ingredient="zucchini">🥒 Zucchini</button>
+      <button class="chip" data-ingredient="chickpeas">🫘 Chickpeas</button>
+    </div>
+    <div class="ingredients" id="ingredientList" aria-live="polite"></div>
+    <div class="actions">
+      <small id="ingredientHint">Add at least one ingredient to get started.</small>
+      <div style="display:flex; gap:9px; flex-wrap:wrap">
+        <button class="secondary" id="clearBtn">Clear all</button>
+        <button class="primary" id="findBtn">Find recipes →</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="results-head">
+    <h2 id="resultsTitle">Recipe ideas</h2>
+    <div id="resultCount">Try the sample ingredients below</div>
+  </div>
+  <section class="recipes" id="recipes" aria-live="polite"></section>
+
+  <footer>
+    Pantry Pal uses a built-in recipe collection, so it works offline and needs no account.<br>
+    Suggestions are flexible — check ingredient quantities and make sure food is cooked safely.
+  </footer>
+</div>
+<script>
+const recipes = [
+  {
+    name:"Cheesy zucchini pasta", emoji:"🍝", time:20, difficulty:"Easy",
+    ingredients:["pasta","zucchini","cheese","garlic","olive oil"],
+    essentials:["pasta","zucchini"], description:"A creamy, comforting pasta with golden zucchini and melted cheese.",
+    steps:["Boil the pasta in salted water according to the packet instructions. Save a little pasta water before draining.","Slice the zucchini and fry it in a little oil for 6–8 minutes until soft and golden. Add garlic if you have it.","Stir in the drained pasta, cheese and a splash of pasta water. Mix until glossy, season, and serve."]
+  },
+  {
+    name:"Veggie fried rice", emoji:"🍚", time:15, difficulty:"Easy",
+    ingredients:["rice","eggs","peas","carrots","soy sauce","spring onion"],
+    essentials:["rice"], description:"A quick way to turn leftover rice and vegetables into a filling meal.",
+    steps:["Cook the rice, or use cold leftover rice. If freshly cooked, let it steam off for a few minutes.","Scramble the eggs in a hot pan with a little oil, then set them aside.","Fry any chopped vegetables until tender. Add rice and soy sauce, stir-fry for 3–4 minutes, then mix the eggs back in."]
+  },
+  {
+    name:"Potato and cheese hash", emoji:"🥔", time:25, difficulty:"Easy",
+    ingredients:["potatoes","cheese","onion","eggs","paprika"],
+    essentials:["potatoes"], description:"Crispy pan-fried potatoes finished with melted cheese.",
+    steps:["Dice the potatoes into small cubes. Boil for 7–8 minutes until just starting to soften, then drain.","Fry the potatoes in oil over medium-high heat, turning occasionally, until golden and cooked through.","Add chopped onion or paprika if available. Scatter cheese over the top and cover until melted. Add a fried egg if you like."]
+  },
+  {
+    name:"Tomato chickpea stew", emoji:"🍅", time:25, difficulty:"Easy",
+    ingredients:["chickpeas","tomatoes","onion","garlic","paprika","bread"],
+    essentials:["chickpeas","tomatoes"], description:"A warm, simple stew that works with canned or fresh tomatoes.",
+    steps:["Chop the onion and garlic, then soften them in a pot with a little oil for 3–4 minutes.","Add chopped tomatoes, drained chickpeas, paprika, salt and pepper. Add a splash of water if needed.","Simmer for 15 minutes, stirring occasionally. Taste and season, then serve with bread or rice if you have it."]
+  },
+  {
+    name:"Quick Greek-style salad", emoji:"🥗", time:10, difficulty:"Easy",
+    ingredients:["cucumber","tomatoes","feta","olives","lettuce","olive oil"],
+    essentials:["cucumber","tomatoes"], description:"A fresh, crunchy salad with salty cheese and olives.",
+    steps:["Chop the cucumber and tomatoes, and tear the lettuce into bite-sized pieces.","Crumble feta over the vegetables and add olives if you have them.","Dress with olive oil, a little vinegar or lemon, black pepper and a pinch of salt."]
+  },
+  {
+    name:"Simple veggie omelette", emoji:"🍳", time:12, difficulty:"Easy",
+    ingredients:["eggs","cheese","zucchini","tomatoes","onion"],
+    essentials:["eggs"], description:"A quick, flexible omelette for breakfast, lunch or a light dinner.",
+    steps:["Beat 2–3 eggs in a bowl with salt and pepper.","If using zucchini, onion or tomatoes, chop them and cook in an oiled pan until softened.","Pour in the eggs. Cook over low-medium heat until mostly set, add cheese, fold in half and cook until the eggs are fully set."]
+  },
+  {
+    name:"Creamy tomato pasta", emoji:"🍅", time:20, difficulty:"Easy",
+    ingredients:["pasta","tomatoes","cream","cheese","garlic","onion"],
+    essentials:["pasta","tomatoes"], description:"A comforting tomato pasta that can be made creamy with dairy or cheese.",
+    steps:["Cook pasta in salted water according to the packet instructions.","Fry chopped onion and garlic in a little oil. Add chopped tomatoes and cook for 8–10 minutes until saucy.","Stir in a splash of cream or pasta water and some cheese. Toss with the drained pasta and season to taste."]
+  },
+  {
+    name:"Crispy chickpea bowl", emoji:"🫘", time:20, difficulty:"Easy",
+    ingredients:["chickpeas","rice","cucumber","yogurt","lemon","paprika"],
+    essentials:["chickpeas"], description:"A mix-and-match bowl with spiced chickpeas and a cool yogurt sauce.",
+    steps:["Drain and dry the chickpeas. Toss with oil, paprika, salt and pepper, then pan-fry for 8–10 minutes until golden.","Serve over cooked rice or any grains you have.","Mix yogurt with lemon juice, salt and a splash of water. Add chopped cucumber and spoon the sauce over the bowl."]
+  },
+  {
+    name:"Cheese quesadilla", emoji:"🫓", time:10, difficulty:"Easy",
+    ingredients:["tortillas","cheese","beans","tomatoes","onion"],
+    essentials:["tortillas","cheese"], description:"A crisp, melty snack or meal. Add beans or vegetables to make it more filling.",
+    steps:["Sprinkle cheese over half of a tortilla and add any chopped vegetables or drained beans.","Fold it over and cook in a dry pan over medium heat for 2–3 minutes per side, until golden and the cheese melts.","Let it cool briefly, slice into wedges and serve with chopped tomatoes or yogurt."]
+  },
+  {
+    name:"Garlic butter mushrooms on toast", emoji:"🍄", time:12, difficulty:"Easy",
+    ingredients:["mushrooms","bread","butter","garlic","cheese"],
+    essentials:["mushrooms","bread"], description:"Savory mushrooms piled onto crisp toast.",
+    steps:["Slice the mushrooms and chop garlic if available.","Cook mushrooms in butter or oil over medium-high heat until browned and their liquid has evaporated. Add garlic near the end.","Toast the bread, spoon the mushrooms on top, and finish with cheese, herbs or black pepper."]
+  },
+  {
+    name:"Baked feta-style vegetables", emoji:"🧀", time:30, difficulty:"Easy",
+    ingredients:["feta","zucchini","tomatoes","onion","olive oil"],
+    essentials:["feta","tomatoes"], description:"Soft roasted vegetables with salty cheese — good with bread, pasta or rice.",
+    steps:["Heat the oven to 200°C. Chop the vegetables and place them in a baking dish with olive oil, salt and pepper.","Place feta in the middle or crumble it over the vegetables.","Bake for about 20–25 minutes until the vegetables are tender. Stir together and serve with bread or cooked pasta."]
+  },
+  {
+    name:"Banana oat pancakes", emoji:"🥞", time:15, difficulty:"Easy",
+    ingredients:["banana","eggs","oats","milk","cinnamon"],
+    essentials:["banana","eggs"], description:"Naturally sweet pancakes made with a few everyday ingredients.",
+    steps:["Mash 1 ripe banana in a bowl and mix with 2 eggs and a few spoonfuls of oats.","Add a splash of milk and cinnamon if available. Let the mixture sit for 2 minutes.","Cook small pancakes in a lightly oiled pan over medium-low heat for 2–3 minutes per side, until cooked through."]
+  }
+];
+
+const synonyms = {
+  "egg":"eggs", "noodles":"pasta", "spaghetti":"pasta", "macaroni":"pasta",
+  "potato":"potatoes", "tomato":"tomatoes", "chickpea":"chickpeas",
+  "garlic clove":"garlic", "courgette":"zucchini", "feta cheese":"feta",
+  "feta cheese":"feta", "white cheese":"feta", "greek yogurt":"yogurt",
+  "plain yoghurt":"yogurt", "yoghurt":"yogurt", "bell pepper":"pepper",
+  "scallions":"spring onion", "green onion":"spring onion", "oats":"oats",
+  "oatmeal":"oats", "olive oil":"olive oil", "mushroom":"mushrooms",
+  "tortilla wraps":"tortillas", "wraps":"tortillas", "black beans":"beans",
+  "kidney beans":"beans", "lettuce":"lettuce", "salad":"lettuce",
+  "cucumber":"cucumber", "cucumbers":"cucumber", "cheddar":"cheese",
+  "mozzarella":"cheese", "parmesan":"cheese", "grated cheese":"cheese",
+  "butter":"butter", "milk":"milk", "cream":"cream", "rice":"rice",
+  "bread":"bread", "flour":"flour", "lemon juice":"lemon"
+};
+const normalize = value => {
+  const s = value.trim().toLowerCase().replace(/[.!]/g,"");
+  return synonyms[s] || s;
+};
+let pantry = [];
+const input = document.getElementById("ingredientInput");
+const list = document.getElementById("ingredientList");
+const hint = document.getElementById("ingredientHint");
+const recipesEl = document.getElementById("recipes");
+const count = document.getElementById("resultCount");
+const title = document.getElementById("resultsTitle");
+
+function addIngredients(raw) {
+  const items = raw.split(/[,;\n]/).map(normalize).filter(Boolean);
+  let added = 0;
+  items.forEach(item => {
+    if (!pantry.includes(item)) { pantry.push(item); added++; }
+  });
+  input.value = "";
+  renderPantry();
+  if (added) findRecipes();
+}
+function renderPantry() {
+  list.innerHTML = "";
+  pantry.forEach(item => {
+    const tag = document.createElement("span");
+    tag.className = "ingredient";
+    const label = document.createElement("span");
+    label.textContent = item;
+    const remove = document.createElement("button");
+    remove.type = "button"; remove.textContent = "×"; remove.setAttribute("aria-label", "Remove " + item);
+    remove.addEventListener("click", () => { pantry = pantry.filter(x => x !== item); renderPantry(); findRecipes(); });
+    tag.append(label, remove); list.appendChild(tag);
+  });
+  hint.textContent = pantry.length ? `${pantry.length} ingredient${pantry.length === 1 ? "" : "s"} added` : "Add at least one ingredient to get started.";
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function findRecipes() {
+  if (!pantry.length) {
+    title.textContent = "Recipe ideas";
+    count.textContent = "Add ingredients to begin";
+    recipesEl.innerHTML = `<div class="empty"><div class="big">🥕</div><h3>Your next meal starts here</h3><p>Add ingredients above and we’ll find the closest matches.</p></div>`;
+    return;
+  }
+  const scored = recipes.map(recipe => {
+    const matched = recipe.ingredients.filter(i => pantry.includes(i));
+    const essentialsMatched = recipe.essentials.filter(i => pantry.includes(i)).length;
+    const missingEssentials = recipe.essentials.filter(i => !pantry.includes(i));
+    const score = matched.length / recipe.ingredients.length;
+    return {...recipe, matched, missingEssentials, score, essentialsMatched};
+  }).filter(r => r.matched.length > 0)
+    .sort((a,b) => (b.essentialsMatched - a.essentialsMatched) || (b.score - a.score) || (b.matched.length - a.matched.length));
+  title.textContent = "Your recipe matches";
+  count.textContent = `${scored.length} idea${scored.length === 1 ? "" : "s"} found`;
+  if (!scored.length) {
+    recipesEl.innerHTML = `<div class="empty"><div class="big">🧑‍🍳</div><h3>No exact matches yet</h3><p>Try adding a staple such as eggs, pasta, rice, potatoes, tomatoes, cheese or chickpeas. You can also try different ingredient names.</p></div>`;
+    return;
+  }
+  recipesEl.innerHTML = scored.slice(0,8).map(r => {
+    const percentage = Math.round(r.score * 100);
+    const matchedText = r.matched.map(escapeHtml).join(", ");
+    const missing = r.ingredients.filter(i => !pantry.includes(i));
+    const ingredientLine = r.ingredients.map(i => pantry.includes(i) ? `<li>${escapeHtml(i)}</li>` : `<li class="missing">${escapeHtml(i)} <em>(optional / missing)</em></li>`).join("");
+    const steps = r.steps.map(step => `<li>${escapeHtml(step)}</li>`).join("");
+    return `<article class="recipe">
+      <div class="recipe-top">
+        <div style="display:flex;gap:12px;align-items:center">
+          <div class="emoji">${r.emoji}</div>
+          <div><h3>${escapeHtml(r.name)}</h3><div class="meta">⏱ ${r.time} min · ${r.difficulty}</div></div>
+        </div>
+        <div class="match">${r.matched.length} match${r.matched.length===1?"":"es"}</div>
+      </div>
+      <p>${escapeHtml(r.description)}</p>
+      <h4>You have</h4><p style="margin:0">${matchedText}</p>
+      <h4>Ingredients</h4><ul>${ingredientLine}</ul>
+      <h4>How to make it</h4><ol>${steps}</ol>
+    </article>`;
+  }).join("");
+}
+document.getElementById("addBtn").addEventListener("click", () => addIngredients(input.value));
+input.addEventListener("keydown", e => { if (e.key === "Enter") addIngredients(input.value); });
+document.getElementById("findBtn").addEventListener("click", findRecipes);
+document.getElementById("clearBtn").addEventListener("click", () => { pantry = []; renderPantry(); findRecipes(); });
+document.getElementById("quickChips").addEventListener("click", e => {
+  const btn = e.target.closest("[data-ingredient]");
+  if (btn) addIngredients(btn.dataset.ingredient);
+});
+addIngredients("rice, eggs, zucchini, cheese, tomatoes");
+</script>
+</body>
+</html>
